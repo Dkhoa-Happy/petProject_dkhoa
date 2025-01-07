@@ -18,12 +18,12 @@ const Navbar = async () => {
               <Home className="size-6 sm:hidden" />
             </Link>
 
-            <Link href="/users" className="flex items-center gap-2">
+            <Link href="/user" className="flex items-center gap-2">
               <span className="max-sm:hidden">Users</span>
               <UserRound className="size-6 sm:hidden" />
             </Link>
 
-            <Link href="/startup/create" className="flex items-center gap-2">
+            <Link href="/post/create" className="flex items-center gap-2">
               <span className="max-sm:hidden">Create</span>
               <BadgePlus className="size-6 sm:hidden" />
             </Link>
