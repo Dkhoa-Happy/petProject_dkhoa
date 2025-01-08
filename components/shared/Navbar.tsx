@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { BadgePlus, Home, UserRound } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 const Navbar = async () => {
   return (
@@ -33,7 +33,6 @@ const Navbar = async () => {
                 src="https://i.pinimg.com/736x/ae/ba/70/aeba702dc253fc6b892693a028473b9b.jpg"
                 alt="avatar"
               />
-              <AvatarFallback>AV</AvatarFallback>
             </Avatar>
           </>
         </div>

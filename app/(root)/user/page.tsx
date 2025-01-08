@@ -19,12 +19,12 @@ const Page = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
           <StatCard
             title="Total Users"
-            value="5,423"
+            value="100"
             icon={<Users className="h-6 w-6" />}
           />
           <StatCard
             title="Active Users"
-            value="18"
+            value="54"
             icon={<MonitorSmartphone className="h-6 w-6" />}
           />
         </div>

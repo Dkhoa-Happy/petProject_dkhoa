@@ -1,12 +1,12 @@
 import React from "react";
 import { Post } from "@/module/post/interface";
-import { EyeIcon } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@/module/user/interface";
+import { BookCopy } from "lucide-react";
 
 const PostCard = ({ post, user }: { post: Post; user?: User }) => {
   const borderColor =
@@ -17,8 +17,13 @@ const PostCard = ({ post, user }: { post: Post; user?: User }) => {
       <div className="flex-between">
         <p className="post_date">25/1/2025</p>
         <div className="flex gap-1.5">
-          <EyeIcon className="size-6 text-primary" />
-          <span className="text-16-medium">10</span>
+          <Image
+            src="/icons/dots.svg"
+            alt="dots"
+            width={15}
+            height={15}
+            className="size-6 text-primary"
+          />
         </div>
       </div>
 
@@ -94,7 +99,9 @@ const PostCard = ({ post, user }: { post: Post; user?: User }) => {
       </Link>
 
       <div className="flex-between gap-3 mt-5">
-        <p className="text-16-medium">Post</p>
+        <p className="text-16-medium">
+          <BookCopy />
+        </p>
         <Button className="post_btn" asChild>
           <Link href={`/posts/${post.id}`}>Detail</Link>
         </Button>
