@@ -11,12 +11,16 @@
 }
 
 @layer utilities {
+  .c-space {
+    @apply sm:px-10 px-5;
+  }
+
   .flex-between {
     @apply flex justify-between items-center;
   }
 
   .text-30-extrabold {
-    @apply text-[30px] font-extrabold text-white;
+    @apply text-[20px] font-extrabold text-white;
   }
 
   .text-30-bold {
@@ -32,7 +36,7 @@
   }
 
   .text-24-black {
-    @apply text-[24px] font-black text-black;
+    @apply text-[20px] font-black text-black;
   }
 
   .text-20-medium {
@@ -47,7 +51,7 @@
     @apply font-normal text-sm text-white-100/80;
   }
 
-  .pink_container {
+  .blue_container {
     @apply w-full bg-primary min-h-[530px] pattern flex justify-center items-center flex-col py-10 px-6;
   }
 
@@ -85,7 +89,7 @@
   }
 
   .profile_card {
-    @apply w-80 px-6 pb-6 pt-20 flex flex-col justify-center items-center bg-primary border-[5px] border-black shadow-100 rounded-[30px] relative z-0 h-fit max-lg:w-full;
+    @apply w-96 px-6 pb-6 pt-20 flex flex-col justify-center items-center bg-primary border-[5px] border-black shadow-100 rounded-[30px] relative z-0 h-fit max-lg:w-full;
   }
 
   .profile_title {
@@ -131,28 +135,33 @@
     @apply size-[50px] rounded-full bg-black flex justify-center items-center !important;
   }
 
-  /* startupcard */
-  .startup-card {
+  /* User Table */
+  .user-table {
+    @apply bg-white border-[5px] border-black py-6 px-5 rounded-[22px] shadow-200  transition-all duration-500;
+  }
+
+  /* Post Card */
+  .post {
     @apply bg-white border-[5px] border-black py-6 px-5 rounded-[22px] shadow-200 hover:border-primary transition-all duration-500 hover:shadow-300 hover:bg-primary-100;
   }
 
-  .startup-card_date {
+  .post_date {
     @apply font-medium text-[16px] bg-primary-100 px-4 py-2 rounded-full group-hover:bg-white-100;
   }
 
-  .startup-card_desc {
+  .post_desc {
     @apply font-normal text-[16px] line-clamp-2 my-3 text-black-100 break-all;
   }
 
-  .startup-card_img {
+  .post_img {
     @apply w-full h-[164px] rounded-[10px] object-cover;
   }
 
-  .startup-card_btn {
+  .post_btn {
     @apply rounded-full bg-black-200 font-medium text-[16px] text-white px-5 py-3 !important;
   }
 
-  .startup-card_skeleton {
+  .post_skeleton {
     @apply w-full h-96 rounded-[22px] bg-zinc-400;
   }
 
@@ -200,11 +209,11 @@
 
   .pattern {
     background-image: linear-gradient(
-            to right,
-            transparent 49.5%,
-            rgba(251, 232, 67, 0.2) 49.5%,
-            rgba(251, 232, 67, 0.6) 50.5%,
-            transparent 50.5%
+      to right,
+      transparent 49.5%,
+      rgba(251, 232, 67, 0.2) 49.5%,
+      rgba(251, 232, 67, 0.6) 50.5%,
+      transparent 50.5%
     );
     background-size: 5% 100%;
     background-position: center;
@@ -218,4 +227,9 @@
 
 .w-md-editor-toolbar {
   padding: 10px !important;
+}
+
+/*  footer */
+.social-icon {
+  @apply w-12 h-12 rounded-full flex justify-center items-center bg-black-300 border border-black-200;
 }
