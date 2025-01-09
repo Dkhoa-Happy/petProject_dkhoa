@@ -4,13 +4,25 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import markdownit from "markdown-it";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@/module/user/interface";
 import { BookCopy } from "lucide-react";
 
-const PostCard = ({ post, user }: { post: Post; user?: User }) => {
+const md = markdownit();
+const PostCard = ({
+  post,
+  user,
+  imageUrl,
+}: {
+  post: Post;
+  user?: User;
+  imageUrl: string;
+}) => {
   const borderColor =
     user?.status === "active" ? "border-green-500" : "border-red-500";
+
+  const parsedContent = md.render(post?.body || "");
 
   return (
     <li className="post group">
@@ -91,9 +103,18 @@ const PostCard = ({ post, user }: { post: Post; user?: User }) => {
       </div>
 
       <Link href={`/posts/${post.id}`}>
-        <p className="post_desc">{post.body}</p>
+        {parsedContent && (
+          <article
+            className="post_desc"
+            dangerouslySetInnerHTML={{ __html: parsedContent }}
+          />
+        )}
+        <p className="post_desc">{}</p>
         <img
-          src="https://i.pinimg.com/736x/ea/2c/f6/ea2cf6975ca4178d53a27b72c301f7b2.jpg"
+          src={
+            imageUrl ||
+            "https://i.pinimg.com/736x/ea/2c/f6/ea2cf6975ca4178d53a27b72c301f7b2.jpg"
+          }
           alt="post-card_img"
         />
       </Link>

@@ -16,6 +16,7 @@ interface SearchParams {
 const Home = ({ searchParams }: { searchParams: SearchParams }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [page, setPage] = useState(1); // Current page
   const [isLoading, setIsLoading] = useState(false); // Prevent duplicate loads
   const [hasMore, setHasMore] = useState(true); // Tracks if there’s more data to load
@@ -42,7 +43,13 @@ const Home = ({ searchParams }: { searchParams: SearchParams }) => {
     try {
       const postsData = await getAllPost(page, 10); // Fetch 10 posts per page
       if (postsData?.length > 0) {
-        setPosts((prevPosts) => [...prevPosts, ...postsData]);
+        const updatedPost = postsData.map((post: Post) => {
+          const regex = /!\[.*?\]\((.*?)\)/;
+          const match = post.body.match(regex);
+          return { ...post, imageUrl: match ? match[1] : null };
+        });
+
+        setPosts((prevPosts) => [...prevPosts, ...updatedPost]);
         setPage((prevPage) => prevPage + 1); // Increment page
       } else {
         setHasMore(false); // No more posts to load
@@ -76,7 +83,14 @@ const Home = ({ searchParams }: { searchParams: SearchParams }) => {
           {posts.length > 0 ? (
             posts.map((post) => {
               const user = users.find((user) => user.id === post.user_id);
-              return <PostCard key={post.id} post={post} user={user} />;
+              return (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  user={user}
+                  imageUrl={post.imageUrl || ""}
+                />
+              );
             })
           ) : (
             <p className="no-results">No Post Found</p>
