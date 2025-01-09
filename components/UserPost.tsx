@@ -7,7 +7,7 @@ import { User } from "@/module/user/interface";
 
 const UserPost = ({ id }: { id: number }) => {
   const [posts, setPosts] = useState<Post[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
+  const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -17,27 +17,43 @@ const UserPost = ({ id }: { id: number }) => {
           getUserById(id),
         ]);
 
-        if (postData) return setPosts(postData);
-        if (userData) return setUsers(userData);
+        if (postData && Array.isArray(postData)) {
+          // Extract imageUrl for each post
+          const updatedPosts = postData.map((post) => {
+            const regex = /!\[.*?\]\((.*?)\)/;
+            const match = post.body.match(regex);
+            return { ...post, imageUrl: match ? match[1] : null };
+          });
+          setPosts(updatedPosts);
+        }
+
+        if (userData) {
+          setUser(userData);
+        }
       } catch (e) {
         console.log("Error fetching data: ", e);
       }
     };
 
     fetchData();
-  }, []);
+  }, [id]);
 
   return (
     <>
       {posts.length > 0 ? (
-        posts.map((post) => {
-          const user = users.find((user) => user.id === post.user_id);
-          return <PostCard key={post.id} post={post} user={user} />;
-        })
+        posts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            user={user || undefined} // Pass user data
+            imageUrl={post.imageUrl || ""} // Pass individual post image
+          />
+        ))
       ) : (
         <p className="no-results">No Post Found</p>
       )}
     </>
   );
 };
+
 export default UserPost;
