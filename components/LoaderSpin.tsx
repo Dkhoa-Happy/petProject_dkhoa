@@ -1,38 +1,33 @@
-import React, { useEffect, useState } from "react";
-import Image from "next/image";
+import React, { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-import { getAllPost } from "@/module/post/postApi";
 
-const LoaderSpin = () => {
-  const [ref, inView] = useInView();
-  const [data, setData] = useState();
+interface LoaderSpinProps {
+  onInView: () => void; // Callback triggered when the spinner is visible
+  isLoading: boolean; // To avoid triggering multiple fetches
+}
+
+const LoaderSpin = ({ onInView, isLoading }: LoaderSpinProps) => {
+  const [ref, inView] = useInView({
+    threshold: 0.5, // Trigger when at least 50% of the spinner is visible
+  });
 
   useEffect(() => {
-    if (inView) {
-      const fetchPosts = async () => {
-        const data = await getAllPost();
-        setData(data || []); // Ensure data is an array
-      };
-
-      fetchPosts();
+    if (inView && !isLoading) {
+      onInView(); // Fetch data when spinner enters the viewport
     }
-  }, [inView, data]);
+  }, [inView, isLoading, onInView]);
 
   return (
-    <>
-      <section className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-10"></section>
-      <section className="flex justify-center items-center w-full">
-        <div ref={ref}>
-          <Image
-            src="/icons/LoaderSpin"
-            alt="loaderspin"
-            width={56}
-            height={56}
-            className="object-contain"
-          />
-        </div>
-      </section>
-    </>
+    <div ref={ref} className="flex justify-center items-center w-full my-4">
+      <img
+        src="/icons/Loader.svg"
+        alt="Loading spinner"
+        width={56}
+        height={56}
+        className="object-contain animate-spin"
+      />
+    </div>
   );
 };
+
 export default LoaderSpin;
