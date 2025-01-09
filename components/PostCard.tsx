@@ -8,34 +8,45 @@ import markdownit from "markdown-it";
 import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@/module/user/interface";
 import { BookCopy } from "lucide-react";
+import ActionDropdown from "@/components/ActionDropdown";
+import { avatarUserPlaceholder } from "@/constants";
+import { motion } from "framer-motion";
 
 const md = markdownit();
 const PostCard = ({
   post,
   user,
   imageUrl,
+  index,
 }: {
   post: Post;
   user?: User;
   imageUrl: string;
+  index: number;
 }) => {
   const borderColor =
     user?.status === "active" ? "border-green-500" : "border-red-500";
 
   const parsedContent = md.render(post?.body || "");
 
+  const variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1 },
+  };
+
   return (
-    <li className="post group">
+    <motion.div
+      variants={variants}
+      initial="hidden"
+      animate="visible"
+      transition={{ delay: index * 0.2, ease: "easeInOut", duration: 0.5 }}
+      viewport={{ once: true, amount: 0.2 }}
+      className="post group"
+    >
       <div className="flex-between">
         <p className="post_date">25/1/2025</p>
         <div className="flex gap-1.5">
-          <Image
-            src="/icons/dots.svg"
-            alt="dots"
-            width={15}
-            height={15}
-            className="size-6 text-primary"
-          />
+          <ActionDropdown post={post} />
         </div>
       </div>
 
@@ -83,7 +94,7 @@ const PostCard = ({
           {user?.email?.includes("@johnston") ? (
             <div className={`rounded-full p-0.5 border-2 ${borderColor}`}>
               <Image
-                src="https://i.pinimg.com/736x/e9/e0/7d/e9e07de22e3ef161bf92d1bcf241e4d0.jpg"
+                src={avatarUserPlaceholder}
                 alt={user?.name || "default user"}
                 width={48}
                 height={48}
@@ -127,7 +138,7 @@ const PostCard = ({
           <Link href={`/posts/${post.id}`}>Detail</Link>
         </Button>
       </div>
-    </li>
+    </motion.div>
   );
 };
 

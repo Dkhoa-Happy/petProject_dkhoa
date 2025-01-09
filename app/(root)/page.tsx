@@ -89,6 +89,7 @@ const Home = ({ searchParams }: { searchParams: SearchParams }) => {
                   post={post}
                   user={user}
                   imageUrl={post.imageUrl || ""}
+                  index={1}
                 />
               );
             })

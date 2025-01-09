@@ -6,11 +6,19 @@ import { CgGenderFemale, CgGenderMale } from "react-icons/cg";
 import { User } from "@/module/user/interface";
 import { getAllUser } from "@/module/user/userApi";
 import Link from "next/link";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const UserTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const usersPerPage = 8;
-  const [users, setUsers] = useState<User[]>([]); // Default value: []
+  const [users, setUsers] = useState<User[]>([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -21,11 +29,14 @@ const UserTable = () => {
     fetchUsers();
   }, []);
 
+  const totalPages = Math.ceil(users.length / usersPerPage);
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
   const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
-  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
 
   return (
     <>
@@ -101,24 +112,34 @@ const UserTable = () => {
                   {Math.min(indexOfLastUser, users.length)} of {users.length}{" "}
                   entries
                 </p>
-                <div className="flex space-x-2">
-                  {Array.from(
-                    { length: Math.ceil(users.length / usersPerPage) },
-                    (_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => paginate(i + 1)}
-                        className={`px-3 py-1 rounded ${
-                          currentPage === i + 1
-                            ? "bg-blue-500 text-white"
-                            : "bg-gray-200 text-gray-700"
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ),
-                  )}
-                </div>
+                <Pagination>
+                  <PaginationPrevious
+                    onClick={() =>
+                      handlePageChange(Math.max(currentPage - 1, 1))
+                    }
+                  >
+                    Previous
+                  </PaginationPrevious>
+                  <PaginationContent>
+                    {Array.from({ length: totalPages }, (_, i) => (
+                      <PaginationItem key={i}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(i + 1)}
+                          active={currentPage === i + 1}
+                        >
+                          {i + 1}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                  </PaginationContent>
+                  <PaginationNext
+                    onClick={() =>
+                      handlePageChange(Math.min(currentPage + 1, totalPages))
+                    }
+                  >
+                    Next
+                  </PaginationNext>
+                </Pagination>
               </>
             ) : (
               <p className="text-sm text-gray-500">No users found.</p>

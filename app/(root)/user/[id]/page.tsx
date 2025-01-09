@@ -6,6 +6,7 @@ import { getUserById } from "@/module/user/userApi";
 import Image from "next/image";
 import { PostCardSkeleton } from "@/components/PostCard";
 import UserPost from "@/components/UserPost";
+import { avatarUserPlaceholder } from "@/constants";
 
 const Page = ({ params }: { params: Promise<{ id: number }> }) => {
   const id = params.id;
@@ -29,14 +30,14 @@ const Page = ({ params }: { params: Promise<{ id: number }> }) => {
             </h3>
           </div>
           <Image
-            src="https://i.pinimg.com/736x/e9/e0/7d/e9e07de22e3ef161bf92d1bcf241e4d0.jpg"
+            src={avatarUserPlaceholder}
             alt="avatar"
             width={220}
             height={220}
             className="profile_image"
           />
 
-          <p className="text-30-extrabold mt-7 text-center">{user.email}</p>
+          <p className="text-30-extrabold mt-7 text-center">{user?.email}</p>
           <p className="mt-1 text-center text-14-normal">{user?.gender}</p>
         </div>
 

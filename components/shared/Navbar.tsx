@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { BadgePlus, Home, UserRound } from "lucide-react";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { avatarPlaceholderUrl } from "@/constants";
 
 const Navbar = async () => {
   return (
@@ -29,10 +30,7 @@ const Navbar = async () => {
             </Link>
 
             <Avatar className="size-10">
-              <AvatarImage
-                src="https://i.pinimg.com/736x/ae/ba/70/aeba702dc253fc6b892693a028473b9b.jpg"
-                alt="avatar"
-              />
+              <AvatarImage src={avatarPlaceholderUrl} alt="avatar" />
             </Avatar>
           </>
         </div>
