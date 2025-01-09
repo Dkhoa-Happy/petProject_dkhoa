@@ -1,11 +1,17 @@
 import api from "@/api/axios";
 
-export const getAllPost = async () => {
+export const getAllPost = async (page: number = 1, perPage: number = 10) => {
   try {
-    const response = await api.get("/posts?page=1&per_page=100");
+    const response = await api.get(`/posts`, {
+      params: {
+        page,
+        per_page: perPage,
+      },
+    });
     return response.data;
-  } catch (e) {
-    console.error("Error fetching posts:", e);
+  } catch (error) {
+    console.error(`Error fetching posts for page ${page}:`, error);
+    return []; // Return an empty array if an error occurs
   }
 };
 

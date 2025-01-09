@@ -45,7 +45,7 @@ const UserTable = () => {
             </div>
             <table className="w-full">
               <thead>
-                <tr className="text-left text-gray-500">
+                <tr className="text-left justify-center text-gray-500">
                   <th className="pb-4">User ID</th>
                   <th className="pb-4">Name</th>
                   <th className="pb-4">Gender</th>

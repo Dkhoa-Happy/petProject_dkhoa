@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import SearchForm from "@/components/SearchForm";
 import PostCard from "@/components/PostCard";
+import LoaderSpin from "@/components/LoaderSpin";
 import { Post } from "@/module/post/interface";
 import { User } from "@/module/user/interface";
 import { getAllPost } from "@/module/post/postApi";
@@ -15,26 +16,43 @@ interface SearchParams {
 const Home = ({ searchParams }: { searchParams: SearchParams }) => {
   const [posts, setPosts] = useState<Post[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [page, setPage] = useState(1); // Current page
+  const [isLoading, setIsLoading] = useState(false); // Prevent duplicate loads
+  const [hasMore, setHasMore] = useState(true); // Tracks if there’s more data to load
+
   const query = searchParams?.query || "";
 
+  // Fetch users only once
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUsers = async () => {
       try {
-        // Fetch posts and users in parallel
-        const [postsData, usersData] = await Promise.all([
-          getAllPost(),
-          getAllUser(),
-        ]);
-
-        if (postsData) setPosts(postsData);
-        if (usersData) setUsers(usersData);
+        const usersData = await getAllUser();
+        setUsers(usersData || []);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching users:", error);
       }
     };
-
-    fetchData();
+    fetchUsers();
   }, []);
+
+  // Fetch posts for the current page
+  const fetchPosts = async () => {
+    if (isLoading || !hasMore) return; // Skip if already loading or no more posts
+    setIsLoading(true);
+    try {
+      const postsData = await getAllPost(page, 10); // Fetch 10 posts per page
+      if (postsData?.length > 0) {
+        setPosts((prevPosts) => [...prevPosts, ...postsData]);
+        setPage((prevPage) => prevPage + 1); // Increment page
+      } else {
+        setHasMore(false); // No more posts to load
+      }
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <>
@@ -48,6 +66,7 @@ const Home = ({ searchParams }: { searchParams: SearchParams }) => {
         </p>
         <SearchForm query={query} />
       </section>
+
       <section className="section_container">
         <p className="text-30-semibold">
           {query ? `Search results for "${query}"` : "All Posts"}
@@ -64,6 +83,13 @@ const Home = ({ searchParams }: { searchParams: SearchParams }) => {
           )}
         </ul>
       </section>
+
+      {hasMore && (
+        <LoaderSpin
+          onInView={fetchPosts} // Fetch posts when spinner is in view
+          isLoading={isLoading} // Prevent duplicate loading
+        />
+      )}
     </>
   );
 };
