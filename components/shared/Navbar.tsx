@@ -23,7 +23,7 @@ const Navbar = async () => {
               <UserRound className="size-6 sm:hidden" />
             </Link>
 
-            <Link href="/post/create" className="flex items-center gap-2">
+            <Link href="/posts/create" className="flex items-center gap-2">
               <span className="max-sm:hidden">Create</span>
               <BadgePlus className="size-6 sm:hidden" />
             </Link>

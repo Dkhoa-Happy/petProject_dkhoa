@@ -32,3 +32,19 @@ export const getPostByUserId = async (user_id: number) => {
     console.log(`Error fetching post with user Id ${user_id}: `, e);
   }
 };
+
+export const createPost = async (
+  user_id: number,
+  title: string,
+  body: string,
+) => {
+  try {
+    const response = await api.post(`/users/${user_id}/posts`, {
+      title,
+      body,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error creating post:", error);
+  }
+};
