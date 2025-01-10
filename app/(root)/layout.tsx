@@ -1,4 +1,5 @@
 import Navbar from "@/components/shared/Navbar";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 
 export default function Layout({
   children,
@@ -7,6 +8,7 @@ export default function Layout({
     <main className="font-work-sans">
       <Navbar />
       {children}
+      <ScrollToTopButton />
     </main>
   );
 }

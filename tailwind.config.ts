@@ -29,6 +29,12 @@ const config: Config = {
           "100": "#F7F7F7",
           DEFAULT: "#FFFFFF",
         },
+        light: {
+          "100": "#333F4E",
+          "200": "#A3B2C7",
+          "300": "#F2F5F9",
+          "400": "#F2F4F8",
+        },
       },
       fontFamily: {
         "work-sans": ["var(--font-work-sans)"],
