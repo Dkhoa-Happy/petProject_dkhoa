@@ -48,3 +48,24 @@ export const createPost = async (
     console.error("Error creating post:", error);
   }
 };
+
+export const updatePost = async (id: number, title: string, body: string) => {
+  try {
+    const response = await api.put(`/posts/${id}`, {
+      title,
+      body,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating post:", error);
+  }
+};
+
+export const deletePost = async (id: number) => {
+  try {
+    const response = await api.delete(`/posts/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting post:", error);
+  }
+};

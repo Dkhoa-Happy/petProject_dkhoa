@@ -1,23 +1,45 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
-import ScrollToTop from "react-scroll-up";
+import React, { useState, useEffect } from "react";
+import { ArrowUp } from "lucide-react";
 
 const ScrollToTopButton = () => {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const toggleVisibility = () => {
+      if (window.pageYOffset > 300) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+    };
+
+    window.addEventListener("scroll", toggleVisibility);
+
+    return () => window.removeEventListener("scroll", toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <div className="relavtive z-[300]">
-      <ScrollToTop showUnder={160}>
-        <p className="font-bold cursor-pointer text-3xl hover:border-2 hover:border-blue-700">
-          <Image
-            src="/icons/scroll-to-top.svg"
-            alt="Scroll To Top button"
-            width={100}
-            height={100}
-          />
-        </p>
-      </ScrollToTop>
-    </div>
+    <>
+      {isVisible && (
+        <button
+          onClick={scrollToTop}
+          className="fixed bottom-4 right-4 z-50 p-2 rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 ease-in-out hover:bg-primary/90 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          aria-label="Scroll to top"
+        >
+          <ArrowUp className="h-6 w-6" />
+        </button>
+      )}
+    </>
   );
 };
+
 export default ScrollToTopButton;

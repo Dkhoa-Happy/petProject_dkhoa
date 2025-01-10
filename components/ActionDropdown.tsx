@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,14 +17,25 @@ import {
 import Image from "next/image";
 import { Post } from "@/module/post/interface";
 import { actionsDropdownItems } from "@/constants";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import api from "@/api/axios";
+import { useToast } from "@/hooks/use-toast";
 
-const ActionDropdown = ({ post }: { post: Post }) => {
+interface ActionDropdownProps {
+  post: Post;
+  onDeleteSuccess?: () => void;
+}
+
+const ActionDropdown: React.FC<ActionDropdownProps> = ({
+  post,
+  onDeleteSuccess,
+}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const { toast } = useToast();
 
   const closeAllModals = () => {
     setIsModalOpen(false);
@@ -32,45 +43,87 @@ const ActionDropdown = ({ post }: { post: Post }) => {
     setAction(null);
   };
 
-  const handleAction = () => {};
+  const handleAction = async () => {
+    if (!action) return;
+    let success = false;
+    setIsLoading(true);
+
+    try {
+      if (action.value === "delete") {
+        // API call to delete the post
+        await api.delete(`/posts/${post.id}`);
+        console.log(`Post deleted: ${post.id}`);
+
+        // Trigger success callback if provided
+        if (onDeleteSuccess) onDeleteSuccess();
+
+        toast: ({
+          title: "Success",
+          description: "Post deleted successfully",
+        });
+        closeAllModals();
+      } else if (action.value === "update") {
+        console.log(`Post updated: ${post.id}`);
+      }
+
+      closeAllModals();
+    } catch (error) {
+      console.error("An error occurred while performing the action:", error);
+      toast: ({
+        title: "Error",
+        description: console.log(
+          "An error occurred while performing the action:",
+          error,
+        ),
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const renderDialogContent = () => {
     if (!action) return null;
 
-    const { value, label } = action;
-
     return (
-      <DialogContent className="shad-dialog button">
+      <DialogContent>
         <DialogHeader className="flex flex-col gap-3">
-          <DialogTitle className="text-center text-light-100">
-            {label}
-          </DialogTitle>
+          <DialogTitle className="text-center">{action.label}</DialogTitle>
 
-          {value === "delete" && (
-            <p className="delete-confirmation">
-              Are you sure you want to delete{` `}
-              <span className="delete-file-name">{post.title}</span>?
+          {action.value === "delete" && (
+            <p className="text-center">
+              Are you sure you want to delete{" "}
+              <span className="font-bold">{post.title}</span>?
             </p>
           )}
         </DialogHeader>
-        {["rename", "delete", "share"].includes(value) && (
-          <DialogFooter className="flex flex-col gap-3 md:flex-row">
-            <Button onClick={closeAllModals} className="modal-cancel-button">
-              Cancel
-            </Button>
-            <Button onClick={handleAction} className="modal-submit-button">
-              <p className="capitalize">{value}</p>
-              {isLoading && (
-                <Image
-                  src="/icons/loader2.svg"
-                  alt="loader"
-                  width={24}
-                  height={24}
-                  className="animate-spin"
-                />
-              )}
-            </Button>
-          </DialogFooter>
-        )}
+
+        <DialogFooter className="flex flex-col gap-3 md:flex-row">
+          <Button
+            onClick={closeAllModals}
+            variant="secondary"
+            className="modal-cancel-button"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleAction}
+            disabled={isLoading}
+            variant="destructive"
+            className="modal-submit-button"
+          >
+            {isLoading ? (
+              <Image
+                src="/icons/loader2.svg"
+                alt="Loading..."
+                width={24}
+                height={24}
+                className="animate-spin"
+              />
+            ) : (
+              action.label
+            )}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     );
   };
@@ -78,8 +131,8 @@ const ActionDropdown = ({ post }: { post: Post }) => {
   return (
     <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
       <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-        <DropdownMenuTrigger className="shad-no-focus">
-          <Image src="/icons/dots.svg" alt="Dots" width={34} height={34} />
+        <DropdownMenuTrigger>
+          <Image src="/icons/dots.svg" alt="Options" width={34} height={34} />
         </DropdownMenuTrigger>
         <DropdownMenuContent>
           <DropdownMenuLabel className="max-w-[200px] truncate">
@@ -92,7 +145,6 @@ const ActionDropdown = ({ post }: { post: Post }) => {
               className="shad-dropdown-item"
               onClick={() => {
                 setAction(actionItem);
-
                 if (["update", "delete"].includes(actionItem.value)) {
                   setIsModalOpen(true);
                 }
@@ -111,7 +163,9 @@ const ActionDropdown = ({ post }: { post: Post }) => {
           ))}
         </DropdownMenuContent>
       </DropdownMenu>
+      {renderDialogContent()}
     </Dialog>
   );
 };
+
 export default ActionDropdown;
