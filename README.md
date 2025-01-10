@@ -470,4 +470,4 @@ export const formSchema = {
 
 ## <a name="links">🔗 Assets</a>
 
-- Fonts and Assets used in the project can be found [here](https://drive.google.com/file/d/1OEFHnEq5pQFP86u8FOBLBBNxKPsbjjqU/view?usp=sharing)
+- Fonts and Assets used in the project can be found [here](https://drive.google.com/drive/folders/1kmjb4N_-WSai1zWL_KqewEorkPRi5UK4?usp=sharing)
