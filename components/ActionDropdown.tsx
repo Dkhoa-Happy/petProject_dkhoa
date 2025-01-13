@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import React, { useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,7 +59,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
         // Trigger success callback if provided
         if (onDeleteSuccess) onDeleteSuccess();
 
-        toast: ({
+        toast({
           title: "Success",
           description: "Post deleted successfully",
         });
@@ -69,12 +71,10 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
       closeAllModals();
     } catch (error) {
       console.error("An error occurred while performing the action:", error);
-      toast: ({
+      toast({
         title: "Error",
-        description: console.log(
-          "An error occurred while performing the action:",
-          error,
-        ),
+        description: "An error occurred while performing the action:",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);

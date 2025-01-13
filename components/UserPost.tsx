@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
 import PostCard from "@/components/PostCard";
 import { getPostByUserId } from "@/module/post/postApi";
@@ -18,7 +20,6 @@ const UserPost = ({ id }: { id: number }) => {
         ]);
 
         if (postData && Array.isArray(postData)) {
-          // Extract imageUrl for each post
           const updatedPosts = postData.map((post) => {
             const regex = /!\[.*?\]\((.*?)\)/;
             const match = post.body.match(regex);
@@ -45,8 +46,9 @@ const UserPost = ({ id }: { id: number }) => {
           <PostCard
             key={post.id}
             post={post}
-            user={user || undefined} // Pass user data
-            imageUrl={post.imageUrl || ""} // Pass individual post image
+            user={user || undefined}
+            imageUrl={post.imageUrl || ""}
+            index={1}
           />
         ))
       ) : (

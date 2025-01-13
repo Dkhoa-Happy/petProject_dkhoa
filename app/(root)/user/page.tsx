@@ -1,5 +1,3 @@
-"use client";
-
 import UserTable from "@/components/UserTable";
 import StatCard from "@/components/StatCard";
 import { MonitorSmartphone, Users } from "lucide-react";

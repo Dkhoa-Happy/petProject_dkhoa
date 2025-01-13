@@ -1,0 +1,95 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+import { Post } from "@/module/post/interface";
+import { User } from "@/module/user/interface";
+import markdownit from "markdown-it";
+import { getPostById } from "@/module/post/postApi";
+import { getUserById } from "@/module/user/userApi";
+import Link from "next/link";
+import Image from "next/image";
+import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
+
+const md = markdownit();
+
+const PostDetail = ({ id }: { id: number }) => {
+  const [post, setPost] = useState<Post | null>(null);
+  const [user, setUser] = useState<User | null>(null);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const postData = await getPostById(id);
+        if (postData) {
+          setPost(postData);
+
+          const regex = /!\[.*?\]\((.*?)\)/;
+          const match = postData.body.match(regex);
+          setImageUrl(match ? match[1] : null);
+
+          const userData = await getUserById(postData.user_id);
+          if (userData) {
+            setUser(userData);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, [id]);
+
+  const parsedContent = md.render(post?.body || "");
+
+  return (
+    <>
+      <section className="blue_container !min-h-[230px]">
+        <p className="tag">29/01/2024</p>
+        <p className="heading">{post?.title}</p>
+      </section>
+      <section className="section_container">
+        <img
+          src={imageUrl || postImagePlaceholder}
+          alt="thumbnail"
+          className="w-full h-auto rounded-xl"
+        />
+
+        <div className="space-y-5 mt-10 max-w-4xl mx-auto">
+          <div className="flex-between gap-5">
+            <Link href={`/user/${user?.id}`}>
+              <div className="flex items-center gap-4">
+                <Image
+                  src={avatarUserPlaceholder}
+                  alt="avatar"
+                  width={64}
+                  height={64}
+                  className="rounded-full drop-shadow-lg"
+                />
+                <div>
+                  <p className="text-20-medium">{user?.name}</p>
+                  <p className="text-16-medium !text-black-300">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+            </Link>
+            <p className="category-tag">Tech</p>
+          </div>
+
+          <h3 className="text-30-bold">Post Detail</h3>
+          {parsedContent ? (
+            <article
+              className="prose max-w-4xl font-work-sans break-all"
+              dangerouslySetInnerHTML={{ __html: parsedContent }}
+            />
+          ) : (
+            <p className="no-result"> No details provided</p>
+          )}
+        </div>
+      </section>
+    </>
+  );
+};
+export default PostDetail;
