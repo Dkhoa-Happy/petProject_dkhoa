@@ -29,6 +29,3 @@ export const avatarPlaceholderUrl =
 
 export const avatarUserPlaceholder =
   "https://i.pinimg.com/736x/e9/e0/7d/e9e07de22e3ef161bf92d1bcf241e4d0.jpg";
-
-export const postImagePlaceholder =
-  "https://i.pinimg.com/736x/ea/2c/f6/ea2cf6975ca4178d53a27b72c301f7b2.jpg";

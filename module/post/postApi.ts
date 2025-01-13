@@ -37,7 +37,7 @@ export const createPost = async (
   user_id: number,
   title: string,
   body: string,
-): Promise<{ id: number }> => {
+) => {
   try {
     const response = await api.post(`/users/${user_id}/posts`, {
       title,
@@ -46,7 +46,6 @@ export const createPost = async (
     return response.data;
   } catch (error) {
     console.error("Error creating post:", error);
-    throw error; // Để thông báo lỗi được truyền lên trên
   }
 };
 

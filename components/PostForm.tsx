@@ -17,11 +17,10 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
-import { createPost } from "@/module/post/postApi";
 
 const PostForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [post, setPost] = useState<string>("");
+  const [post, setPost] = useState("");
   const [users, setUsers] = useState<User[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>("");
   const [isPending, setIsPending] = useState(false);
@@ -32,38 +31,21 @@ const PostForm = () => {
     const fetchUsers = async () => {
       try {
         const response = await api.get("/users");
-        const usersData: User[] = response.data || [];
+        const usersData = response.data || [];
         setUsers(usersData);
         if (usersData.length > 0) {
-          setSelectedUser(usersData[0].id.toString());
+          setSelectedUser(usersData[0].id);
         }
       } catch (e) {
         console.error("Failed to fetch users:", e);
-        toast({
-          title: "Error",
-          description: "Failed to load users.",
-          variant: "destructive",
-        });
       }
     };
     fetchUsers();
-  }, [toast]);
+  }, []);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsPending(true);
-    setErrors({}); // Reset errors trước khi submit
-
-    if (!selectedUser) {
-      toast({
-        title: "Error",
-        description: "Please select a valid user.",
-        variant: "destructive",
-      });
-      setIsPending(false);
-      return;
-    }
-
     try {
       const formData = new FormData(event.currentTarget);
       const formValues = {
@@ -74,19 +56,18 @@ const PostForm = () => {
       // Validate form data
       await formSchema.parseAsync(formValues);
 
-      // Sử dụng `createPost`
-      const response = await createPost(
-        parseInt(selectedUser, 10),
-        formValues.title,
-        formValues.body,
-      );
+      // Make API request
+      const response = await api.post(`/users/${selectedUser}/posts`, {
+        title: formValues.title,
+        body: formValues.body,
+      });
 
-      // Thông báo thành công và điều hướng
+      // Success notification and redirect
       toast({
         title: "Success",
-        description: "Post created successfully!",
+        description: "Post created successfully",
       });
-      router.push(`/posts/${response.id}`);
+      router.push(`/posts/${response.data.id}`);
     } catch (error: any) {
       if (error.response?.data?.errors) {
         setErrors(error.response.data.errors);
@@ -110,7 +91,7 @@ const PostForm = () => {
         </label>
         <Select
           onValueChange={(value) => setSelectedUser(value)}
-          value={selectedUser} // Đảm bảo giá trị `value` đồng bộ với state
+          defaultValue={users.length > 0 ? users[0].id : undefined}
         >
           <SelectTrigger className="post-form_input">
             <SelectValue placeholder="Select a user" />
@@ -118,7 +99,7 @@ const PostForm = () => {
           <SelectContent>
             {users.length > 0 ? (
               users.map((user) => (
-                <SelectItem key={user.id} value={user.id.toString()}>
+                <SelectItem key={user.id} value={user.id}>
                   {user.name}
                 </SelectItem>
               ))
@@ -129,7 +110,6 @@ const PostForm = () => {
             )}
           </SelectContent>
         </Select>
-
         {!selectedUser && (
           <p className="post-form_error">Please select a valid user</p>
         )}
@@ -155,7 +135,7 @@ const PostForm = () => {
         </label>
         <MDEditor
           value={post}
-          onChange={(value) => setPost(value || "")}
+          onChange={(value) => setPost(value as string)}
           id="post"
           preview="edit"
           height={300}

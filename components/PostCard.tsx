@@ -9,7 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { User } from "@/module/user/interface";
 import { BookCopy } from "lucide-react";
 import ActionDropdown from "@/components/ActionDropdown";
-import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
+import { avatarUserPlaceholder } from "@/constants";
 import { motion } from "framer-motion";
 
 const md = markdownit();
@@ -103,7 +103,7 @@ const PostCard = ({
             </div>
           ) : (
             <Image
-              src={avatarUserPlaceholder}
+              src="https://i.pinimg.com/736x/e9/e0/7d/e9e07de22e3ef161bf92d1bcf241e4d0.jpg"
               alt="username"
               width={48}
               height={48}
@@ -121,7 +121,13 @@ const PostCard = ({
           />
         )}
         <p className="post_desc">{}</p>
-        <img src={imageUrl || postImagePlaceholder} alt="post-card_img" />
+        <img
+          src={
+            imageUrl ||
+            "https://i.pinimg.com/736x/ea/2c/f6/ea2cf6975ca4178d53a27b72c301f7b2.jpg"
+          }
+          alt="post-card_img"
+        />
       </Link>
 
       <div className="flex-between gap-3 mt-5">
