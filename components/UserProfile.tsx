@@ -1,32 +1,32 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { User } from "@/module/user/interface";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getUserById } from "@/module/user/userApi";
 import Image from "next/image";
 import { avatarUserPlaceholder } from "@/constants";
-import { getUserById } from "@/module/user/userApi";
+import { User } from "@/module/user/interface";
 
 const UserProfile = ({ id }: { id: number }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const {
+    data: user,
+    isLoading,
+    isError,
+  } = useQuery<User>(
+    ["user", id], // Query key
+    () => getUserById(id), // Fetch function
+    {
+      staleTime: 1000 * 60 * 5, // Giữ dữ liệu trong 5 phút
+      retry: 1, // Thử lại 1 lần nếu lỗi
+    },
+  );
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const data = await getUserById(id);
-        if (data) {
-          setUser(data);
-        } else {
-          console.error("User not found");
-        }
-      } catch (error) {
-        console.error("Error fetching user:", error);
-      }
-    };
-    fetchUser();
-  }, [id]);
-
-  if (!user) {
+  if (isLoading) {
     return <div>Loading...</div>;
+  }
+
+  if (isError || !user) {
+    return <div>Error fetching user data</div>;
   }
 
   return (
@@ -48,4 +48,5 @@ const UserProfile = ({ id }: { id: number }) => {
     </div>
   );
 };
+
 export default UserProfile;

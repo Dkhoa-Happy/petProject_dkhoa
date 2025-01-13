@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import PostCard from "@/components/PostCard";
 import { getPostByUserId } from "@/module/post/postApi";
 import { getUserById } from "@/module/user/userApi";
@@ -8,47 +9,61 @@ import { Post } from "@/module/post/interface";
 import { User } from "@/module/user/interface";
 
 const UserPost = ({ id }: { id: number }) => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [user, setUser] = useState<User | null>(null);
+  // Query để lấy danh sách bài viết
+  const {
+    data: posts = [],
+    isLoading: isLoadingPosts,
+    isError: isErrorPosts,
+  } = useQuery<Post[]>(
+    ["posts", id], // Key của query
+    () => getPostByUserId(id), // Hàm fetch dữ liệu
+    {
+      staleTime: 1000 * 60 * 5, // Dữ liệu sẽ được lưu cache trong 5 phút
+      retry: 1, // Thử lại 1 lần nếu lỗi
+    },
+  );
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [postData, userData] = await Promise.all([
-          getPostByUserId(id),
-          getUserById(id),
-        ]);
+  // Query để lấy thông tin người dùng
+  const {
+    data: user,
+    isLoading: isLoadingUser,
+    isError: isErrorUser,
+  } = useQuery<User>(
+    ["user", id], // Key của query
+    () => getUserById(id), // Hàm fetch dữ liệu
+    {
+      staleTime: 1000 * 60 * 5, // Dữ liệu sẽ được lưu cache trong 5 phút
+      retry: 1, // Thử lại 1 lần nếu lỗi
+    },
+  );
 
-        if (postData && Array.isArray(postData)) {
-          const updatedPosts = postData.map((post) => {
-            const regex = /!\[.*?\]\((.*?)\)/;
-            const match = post.body.match(regex);
-            return { ...post, imageUrl: match ? match[1] : null };
-          });
-          setPosts(updatedPosts);
-        }
+  // Xử lý lỗi
+  if (isErrorPosts || isErrorUser) {
+    return <p className="error">Error fetching data.</p>;
+  }
 
-        if (userData) {
-          setUser(userData);
-        }
-      } catch (e) {
-        console.log("Error fetching data: ", e);
-      }
-    };
+  // Xử lý trạng thái loading
+  if (isLoadingPosts || isLoadingUser) {
+    return <p className="loading">Loading...</p>;
+  }
 
-    fetchData();
-  }, [id]);
+  // Xử lý bài viết có chứa hình ảnh
+  const updatedPosts = posts.map((post) => {
+    const regex = /!\[.*?\]\((.*?)\)/;
+    const match = post.body.match(regex);
+    return { ...post, imageUrl: match ? match[1] : null };
+  });
 
   return (
     <>
-      {posts.length > 0 ? (
-        posts.map((post) => (
+      {updatedPosts.length > 0 ? (
+        updatedPosts.map((post, index) => (
           <PostCard
             key={post.id}
             post={post}
             user={user || undefined}
             imageUrl={post.imageUrl || ""}
-            index={1}
+            index={index + 1} // Truyền index vào PostCard
           />
         ))
       ) : (
