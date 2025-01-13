@@ -1,5 +1,3 @@
-export const navLinks = {};
-
 export const actionsDropdownItems = [
   {
     label: "Update Post",
