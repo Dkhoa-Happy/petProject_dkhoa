@@ -47,6 +47,7 @@ const UserPost = ({ id }: { id: number }) => {
             post={post}
             user={user || undefined} // Pass user data
             imageUrl={post.imageUrl || ""} // Pass individual post image
+            index={1}
           />
         ))
       ) : (
