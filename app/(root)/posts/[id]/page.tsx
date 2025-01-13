@@ -8,6 +8,7 @@ import { getPostById } from "@/module/post/postApi";
 import { Post } from "@/module/post/interface";
 import { User } from "@/module/user/interface";
 import { getUserById } from "@/module/user/userApi";
+import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
 
 const md = markdownit();
 
@@ -55,10 +56,7 @@ const Page = ({ params }: { params: { id: number } }) => {
       <section className="section_container">
         {/* Render the dynamic image URL if it exists; otherwise, fallback to the default thumbnail */}
         <img
-          src={
-            imageUrl ||
-            "https://i.pinimg.com/736x/7e/6a/7a/7e6a7ad6ede2b31f94dc38a6fcd7752e.jpg"
-          }
+          src={imageUrl || postImagePlaceholder}
           alt="thumbnail"
           className="w-full h-auto rounded-xl"
         />
@@ -68,7 +66,7 @@ const Page = ({ params }: { params: { id: number } }) => {
             <Link href={`/user/${user?.id}`}>
               <div className="flex items-center gap-4">
                 <Image
-                  src="https://i.pinimg.com/736x/e9/e0/7d/e9e07de22e3ef161bf92d1bcf241e4d0.jpg"
+                  src={avatarUserPlaceholder}
                   alt="avatar"
                   width={64}
                   height={64}
