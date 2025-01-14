@@ -8,11 +8,10 @@ import Image from "next/image";
 import { getPostById } from "@/module/post/postApi";
 import { getUserById } from "@/module/user/userApi";
 import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
+import CommentList from "@/components/CommentLlist";
 
-// Markdown parser
 const md = markdownit();
 
-// Fetch both post and user data
 const fetchPostWithUser = async (id: number) => {
   const post = await getPostById(id);
   if (!post) throw new Error("Post not found");
@@ -90,6 +89,10 @@ const PostDetail = ({ id }: { id: number }) => {
             <p className="no-result"> No details provided</p>
           )}
         </div>
+
+        <hr className="divider" />
+
+        <CommentList post_id={post.id} />
       </section>
     </>
   );

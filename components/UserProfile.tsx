@@ -12,14 +12,10 @@ const UserProfile = ({ id }: { id: number }) => {
     data: user,
     isLoading,
     isError,
-  } = useQuery<User>(
-    ["user", id], // Query key
-    () => getUserById(id), // Fetch function
-    {
-      staleTime: 1000 * 60 * 5, // Giữ dữ liệu trong 5 phút
-      retry: 1, // Thử lại 1 lần nếu lỗi
-    },
-  );
+  } = useQuery<User>(["user", id], () => getUserById(id), {
+    staleTime: 1000 * 60 * 5,
+    retry: 1,
+  });
 
   if (isLoading) {
     return <div>Loading...</div>;

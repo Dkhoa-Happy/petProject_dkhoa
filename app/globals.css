@@ -236,24 +236,15 @@
 }
 
 /* =====  SHADCN OVERRIDES */
-.shad-no-focus {
-  @apply outline-none ring-offset-transparent focus:ring-transparent focus:ring-offset-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 !important;
-}
 
-.shad-dropdown-item {
-  @apply cursor-pointer !important;
-}
 
-.shad-dialog button {
-  @apply focus:ring-0 focus:ring-offset-0 focus-visible:border-none outline-none focus-visible:outline-none focus-visible:ring-transparent focus-visible:ring-offset-0 !important;
-}
 
 .delete-confirmation {
   @apply text-center text-light-100 !important;
 }
 
 .modal-cancel-button {
-  @apply h-[52px] flex-1 rounded-full bg-white text-light-100 hover:bg-transparent !important;
+  @apply h-[52px] flex-1 rounded-full bg-white text-light-100  !important;
 }
 .modal-submit-button {
   @apply primary-btn !mx-0 h-[52px] w-full flex-1 !important;

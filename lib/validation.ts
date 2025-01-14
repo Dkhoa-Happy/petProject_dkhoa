@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-export const formSchema = {
-  title: z.string().min(3).max(100),
-  body: z.string().min(20).max(500),
-};
+export const formSchema = z.object({
+  title: z
+    .string()
+    .min(3, { message: "Title must be at least 3 characters." })
+    .max(100, { message: "Title must be at most 100 characters." }),
+  body: z
+    .string()
+    .min(20, { message: "Body must be at least 20 characters." })
+    .max(500, { message: "Body must be at most 500 characters." }),
+});

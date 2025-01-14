@@ -44,8 +44,10 @@ export const createPost = async (
       body,
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating post:", error);
+    // Ném lỗi để hàm gọi có thể xử lý
+    throw error.response?.data || error.message || "Unknown error occurred";
   }
 };
 
