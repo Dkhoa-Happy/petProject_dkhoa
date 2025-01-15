@@ -8,16 +8,16 @@ import { getAllUser } from "@/module/user/userApi";
 import LoaderSpin from "@/components/LoaderSpin";
 import PostCard from "@/components/PostCard";
 import { getAllPost } from "@/module/post/postApi";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PostList = ({ query }: { query: string }) => {
-  // Fetch all users
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["users"],
     queryFn: getAllUser,
     select: (data) => data?.data || [],
   });
 
-  // Fetch posts with infinite scrolling
   const {
     data,
     fetchNextPage,
@@ -28,7 +28,6 @@ const PostList = ({ query }: { query: string }) => {
     queryKey: ["posts", query],
     queryFn: ({ pageParam = 1 }) => getAllPost(pageParam, 10),
     getNextPageParam: (lastPage, allPages) => {
-      // Check if there are more posts to load
       return lastPage?.length > 0 ? allPages.length + 1 : undefined;
     },
   });
@@ -46,7 +45,7 @@ const PostList = ({ query }: { query: string }) => {
     <>
       <ul className="mt-7 card_grid">
         {isLoadingUsers || isLoadingPosts ? (
-          <p>Loading...</p>
+          <PostCardSkeleton />
         ) : posts.length > 0 ? (
           posts.map((post) => {
             const user = users.find((user: User) => user.id === post.user_id);
@@ -73,5 +72,15 @@ const PostList = ({ query }: { query: string }) => {
     </>
   );
 };
+
+export const PostCardSkeleton = () => (
+  <>
+    {[0, 1, 2, 3, 4, 5].map((index: number) => (
+      <li key={cn("skeleton", index)}>
+        <Skeleton className="post_skeleton" />
+      </li>
+    ))}
+  </>
+);
 
 export default PostList;
