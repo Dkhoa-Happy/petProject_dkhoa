@@ -1,6 +1,6 @@
 import UserTable from "@/components/UserTable";
 import StatCard from "@/components/StatCard";
-import { MonitorSmartphone, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 const Page = () => {
   return (
@@ -14,17 +14,8 @@ const Page = () => {
       </section>
 
       <div className="container mx-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-          <StatCard
-            title="Total Users"
-            value="100"
-            icon={<Users className="h-6 w-6" />}
-          />
-          <StatCard
-            title="Active Users"
-            value="54"
-            icon={<MonitorSmartphone className="h-6 w-6" />}
-          />
+        <div className="grid grid-cols-1  gap-4 mb-8">
+          <StatCard title="Total Users" icon={<Users className="h-6 w-6" />} />
         </div>
         <UserTable />
       </div>

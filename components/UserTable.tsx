@@ -22,7 +22,7 @@ const UserTable = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const data = await getAllUser();
+      const { data } = await getAllUser();
       setUsers(data || []);
     };
 

@@ -1,53 +1,55 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { Post } from "@/module/post/interface";
-import { User } from "@/module/user/interface";
+import React from "react";
+import { useQuery } from "@tanstack/react-query";
 import markdownit from "markdown-it";
-import { getPostById } from "@/module/post/postApi";
-import { getUserById } from "@/module/user/userApi";
 import Link from "next/link";
 import Image from "next/image";
+import { getPostById } from "@/module/post/postApi";
+import { getUserById } from "@/module/user/userApi";
 import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
 
+// Markdown parser
 const md = markdownit();
 
+// Fetch both post and user data
+const fetchPostWithUser = async (id: number) => {
+  const post = await getPostById(id);
+  if (!post) throw new Error("Post not found");
+
+  const user = await getUserById(post.user_id);
+  return { post, user };
+};
+
 const PostDetail = ({ id }: { id: number }) => {
-  const [post, setPost] = useState<Post | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["postDetail", id],
+    queryFn: () => fetchPostWithUser(id),
+    staleTime: 60000,
+    retry: false,
+  });
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const postData = await getPostById(id);
-        if (postData) {
-          setPost(postData);
+  if (isLoading) {
+    return <p className="loading">Loading post details...</p>;
+  }
 
-          const regex = /!\[.*?\]\((.*?)\)/;
-          const match = postData.body.match(regex);
-          setImageUrl(match ? match[1] : null);
+  if (isError) {
+    return (
+      <p className="error">
+        Error loading post: {(error as Error).message || "Unknown error"}
+      </p>
+    );
+  }
 
-          const userData = await getUserById(postData.user_id);
-          if (userData) {
-            setUser(userData);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [id]);
-
-  const parsedContent = md.render(post?.body || "");
+  const { post, user } = data!;
+  const imageUrl = post.body.match(/!\[.*?\]\((.*?)\)/)?.[1] || null;
+  const parsedContent = md.render(post.body || "");
 
   return (
     <>
       <section className="blue_container !min-h-[230px]">
         <p className="tag">29/01/2024</p>
-        <p className="heading">{post?.title}</p>
+        <p className="heading">{post.title}</p>
       </section>
       <section className="section_container">
         <img
@@ -92,4 +94,5 @@ const PostDetail = ({ id }: { id: number }) => {
     </>
   );
 };
+
 export default PostDetail;

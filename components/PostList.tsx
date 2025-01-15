@@ -18,8 +18,8 @@ const PostList = ({ query }: { query: string }) => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const usersData = await getAllUser();
-        setUsers(usersData || []);
+        const { data } = await getAllUser();
+        setUsers(data);
       } catch (error) {
         console.error("Error fetching users:", error);
       }
