@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Eye, Search } from "lucide-react";
 import { CgGenderFemale, CgGenderMale } from "react-icons/cg";
-import { getAllUser } from "@/module/user/userApi";
+import { getAllUser, searchUser } from "@/module/user/userApi";
 import Link from "next/link";
 import {
   Pagination,
@@ -17,15 +17,29 @@ import { useQuery } from "@tanstack/react-query";
 
 const UserTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const usersPerPage = 8;
 
-  const { data, isLoading, isError } = useQuery(["users"], getAllUser, {
+  // Lấy dữ liệu người dùng thông thường
+  const {
+    data: allUsers = [],
+    isLoading,
+    isError,
+  } = useQuery(["users"], () => getAllUser(1, 100), {
     select: (data) => data?.data || [],
     initialData: [],
   });
 
-  // Ensure `users` is always an array
-  const users = Array.isArray(data) ? data : [];
+  const { data: searchedUsers = [], isFetching } = useQuery(
+    ["users", "search", searchQuery],
+    () => searchUser(searchQuery),
+    {
+      enabled: !!searchQuery,
+      select: (data) => data || [],
+    },
+  );
+
+  const users = searchQuery ? searchedUsers : allUsers;
   const totalPages = Math.ceil(users.length / usersPerPage);
   const indexOfLastUser = currentPage * usersPerPage;
   const indexOfFirstUser = indexOfLastUser - usersPerPage;
@@ -33,6 +47,11 @@ const UserTable = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset về trang đầu khi tìm kiếm
   };
 
   if (isLoading) {
@@ -49,6 +68,16 @@ const UserTable = () => {
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">All Users</h2>
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                className="pl-10 pr-4 py-2 border rounded-lg"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
           </div>
           <table className="w-full">
             <thead>

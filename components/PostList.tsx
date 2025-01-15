@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const PostList = ({ query }: { query: string }) => {
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["users"],
-    queryFn: getAllUser,
+    queryFn: () => getAllUser(1, 100),
     select: (data) => data?.data || [],
   });
 
@@ -25,7 +25,7 @@ const PostList = ({ query }: { query: string }) => {
     isLoading: isLoadingPosts,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["posts", query],
+    queryKey: ["posts"],
     queryFn: ({ pageParam = 1 }) => getAllPost(pageParam, 10),
     getNextPageParam: (lastPage, allPages) => {
       return lastPage?.length > 0 ? allPages.length + 1 : undefined;
@@ -60,7 +60,9 @@ const PostList = ({ query }: { query: string }) => {
             );
           })
         ) : (
-          <p className="no-results">No Post Found</p>
+          <p className="no-results">
+            {query ? `No results for "${query}"` : "No posts found"}
+          </p>
         )}
       </ul>
       {hasNextPage && (

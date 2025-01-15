@@ -12,9 +12,9 @@ interface StatCardProps {
 const StatCard = ({ title, icon }: StatCardProps) => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ["totalUsers"],
-    queryFn: getAllUser,
-    select: (data) => data?.total || "0", // Extract total users from the API response
-    staleTime: 60000, // Cache the data for 1 minute
+    queryFn: () => getAllUser(1, 100),
+    select: (data) => data?.total || "0",
+    staleTime: 60000,
   });
 
   const totalUsers = isLoading ? "Loading..." : isError ? "Error" : data;

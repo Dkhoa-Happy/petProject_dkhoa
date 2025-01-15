@@ -11,17 +11,6 @@ export const actionsDropdownItems = [
   },
 ];
 
-export const sortTypes = [
-  {
-    label: "Name (A-Z)",
-    value: "name-asc",
-  },
-  {
-    label: "Name (Z-A)",
-    value: "name-desc",
-  },
-];
-
 export const avatarPlaceholderUrl =
   "https://i.pinimg.com/736x/ae/ba/70/aeba702dc253fc6b892693a028473b9b.jpg";
 

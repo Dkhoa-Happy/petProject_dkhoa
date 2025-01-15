@@ -50,7 +50,7 @@ const PostDetail = ({ id }: { id: number }) => {
   return (
     <>
       <section className="blue_container !min-h-[230px]">
-        <p className="tag">29/01/2024</p>
+        <p className="tag">29/01/2025</p>
         <p className="heading">{post.title}</p>
       </section>
       <section className="section_container">

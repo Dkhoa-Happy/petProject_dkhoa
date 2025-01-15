@@ -26,7 +26,7 @@ const Home = ({ searchParams }: { searchParams: SearchParams }) => {
         <p className="text-30-semibold">
           {query ? `Search results for "${query}"` : "All Posts"}
         </p>
-        <PostList query="query" />
+        <PostList query={query} />
       </section>
     </>
   );
