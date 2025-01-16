@@ -11,7 +11,7 @@ export const getAllPost = async (page: number = 1, perPage: number = 10) => {
     return response.data;
   } catch (error) {
     console.error(`Error fetching posts for page ${page}:`, error);
-    return []; // Return an empty array if an error occurs
+    return [];
   }
 };
 
@@ -44,8 +44,10 @@ export const createPost = async (
       body,
     });
     return response.data;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating post:", error);
+    // Ném lỗi để hàm gọi có thể xử lý
+    throw error.response?.data || error.message || "Unknown error occurred";
   }
 };
 

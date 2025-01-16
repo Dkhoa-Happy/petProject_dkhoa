@@ -4,8 +4,8 @@ import React, { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 
 interface LoaderSpinProps {
-  onInView: () => void; // Callback triggered when the spinner is visible
-  isLoading: boolean; // To avoid triggering multiple fetches
+  onInView: () => void;
+  isLoading: boolean;
 }
 
 const LoaderSpin = ({ onInView, isLoading }: LoaderSpinProps) => {

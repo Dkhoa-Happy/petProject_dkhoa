@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import MDEditor from "@uiw/react-md-editor";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { z } from "zod";
 import api from "@/api/axios";
-import { formSchema } from "@/lib/validation";
-import { User } from "@/module/user/interface";
 import {
   Select,
   SelectContent,
@@ -17,60 +17,107 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
+import { formSchema } from "@/lib/validation";
+import { User } from "@/module/user/interface";
+
+// Fetch users
+const fetchUsers = async (): Promise<User[]> => {
+  const response = await api.get("/users");
+  return response.data || [];
+};
+
+// Submit post
+const submitPost = async ({
+  selectedUser,
+  formValues,
+}: {
+  selectedUser: number;
+  formValues: { title: string; body: string };
+}) => {
+  const response = await api.post(`/users/${selectedUser}/posts`, {
+    title: formValues.title,
+    body: formValues.body,
+  });
+  return response.data;
+};
 
 const PostForm = () => {
+  const [post, setPost] = useState<string>("");
+  const [selectedUser, setSelectedUser] = useState<number | "">("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [post, setPost] = useState("");
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<string>("");
-  const [isPending, setIsPending] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await api.get("/users");
-        const usersData = response.data || [];
-        setUsers(usersData);
-        if (usersData.length > 0) {
-          setSelectedUser(usersData[0].id);
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery<User[]>(
+    ["users"],
+    fetchUsers,
+    {
+      onSuccess: (data) => {
+        if (data.length > 0) {
+          setSelectedUser(data[0].id);
         }
-      } catch (e) {
-        console.error("Failed to fetch users:", e);
-      }
-    };
-    fetchUsers();
-  }, []);
+      },
+    },
+  );
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsPending(true);
-    try {
-      const formData = new FormData(event.currentTarget);
-      const formValues = {
-        title: formData.get("title") as string,
-        body: post,
-      };
-
-      // Validate form data
-      await formSchema.parseAsync(formValues);
-
-      // Make API request
-      const response = await api.post(`/users/${selectedUser}/posts`, {
-        title: formValues.title,
-        body: formValues.body,
-      });
-
-      // Success notification and redirect
+  const mutation = useMutation(submitPost, {
+    onSuccess: (data) => {
       toast({
         title: "Success",
         description: "Post created successfully",
       });
-      router.push(`/posts/${response.data.id}`);
-    } catch (error: any) {
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors);
+      router.push(`/posts/${data.id}`);
+    },
+    onError: (error: any) => {
+      console.error("Error during mutation:", error);
+      const message =
+        error.response?.data?.message || "An unexpected error occurred.";
+      toast({
+        title: "Error",
+        description: message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setErrors({});
+
+    const formData = new FormData(event.currentTarget);
+    const formValues = {
+      title: formData.get("title") as string,
+      body: post,
+    };
+
+    try {
+      await formSchema.parseAsync(formValues);
+
+      if (!selectedUser) {
+        setErrors((prev) => ({
+          ...prev,
+          user: "Please select a user.",
+        }));
+        toast({
+          title: "Validation Error",
+          description: "Please select a valid user",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      mutation.mutate({ selectedUser: Number(selectedUser), formValues });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const fieldErrors = error.flatten().fieldErrors;
+        setErrors(fieldErrors as Record<string, string>);
+
+        toast({
+          title: "Validation Error",
+          description:
+            "Invalid input. Please correct the errors and try again.",
+          variant: "destructive",
+        });
       } else {
         toast({
           title: "Error",
@@ -78,28 +125,36 @@ const PostForm = () => {
           variant: "destructive",
         });
       }
-    } finally {
-      setIsPending(false);
+      console.error("Validation failed:", error);
     }
   };
 
   return (
     <form className="post-form" onSubmit={handleSubmit}>
       <div>
-        <label htmlFor="User" className="post-form_label">
+        <label htmlFor="user" className="post-form_label">
           User
         </label>
         <Select
-          onValueChange={(value) => setSelectedUser(value)}
-          defaultValue={users.length > 0 ? users[0].id : undefined}
+          value={selectedUser}
+          onValueChange={(value) => setSelectedUser(Number(value))}
         >
           <SelectTrigger className="post-form_input">
-            <SelectValue placeholder="Select a user" />
+            <SelectValue>
+              {selectedUser
+                ? users.find((user: User) => user.id === selectedUser)?.name ||
+                  "Select a user"
+                : "Select a user"}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {users.length > 0 ? (
-              users.map((user) => (
-                <SelectItem key={user.id} value={user.id}>
+            {isLoadingUsers ? (
+              <SelectItem value="loading" disabled>
+                Loading users...
+              </SelectItem>
+            ) : users.length > 0 ? (
+              users.map((user: User) => (
+                <SelectItem key={user.id} value={String(user.id)}>
                   {user.name}
                 </SelectItem>
               ))
@@ -110,9 +165,8 @@ const PostForm = () => {
             )}
           </SelectContent>
         </Select>
-        {!selectedUser && (
-          <p className="post-form_error">Please select a valid user</p>
-        )}
+
+        {errors.user && <p className="post-form_error">{errors.user}</p>}
       </div>
 
       <div>
@@ -150,12 +204,13 @@ const PostForm = () => {
         />
         {errors.body && <p className="post-form_error">{errors.body}</p>}
       </div>
+
       <Button
         type="submit"
-        disabled={isPending}
+        disabled={mutation.isLoading}
         className="post-form_btn text-white"
       >
-        {isPending ? "Submitting..." : "Submit Your Post"}
+        {mutation.isLoading ? "Submitting..." : "Submit Your Post"}
         <Send className="size-6 ml-2" />
       </Button>
     </form>

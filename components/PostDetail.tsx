@@ -8,11 +8,10 @@ import Image from "next/image";
 import { getPostById } from "@/module/post/postApi";
 import { getUserById } from "@/module/user/userApi";
 import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
+import CommentList from "@/components/CommentLlist";
 
-// Markdown parser
 const md = markdownit();
 
-// Fetch both post and user data
 const fetchPostWithUser = async (id: number) => {
   const post = await getPostById(id);
   if (!post) throw new Error("Post not found");
@@ -45,6 +44,9 @@ const PostDetail = ({ id }: { id: number }) => {
   const imageUrl = post.body.match(/!\[.*?\]\((.*?)\)/)?.[1] || null;
   const parsedContent = md.render(post.body || "");
 
+  const borderColor =
+    user?.status === "active" ? "border-green-500" : "border-red-500";
+
   return (
     <>
       <section className="blue_container !min-h-[230px]">
@@ -62,15 +64,58 @@ const PostDetail = ({ id }: { id: number }) => {
           <div className="flex-between gap-5">
             <Link href={`/user/${user?.id}`}>
               <div className="flex items-center gap-4">
-                <Image
-                  src={avatarUserPlaceholder}
-                  alt="avatar"
-                  width={64}
-                  height={64}
-                  className="rounded-full drop-shadow-lg"
-                />
+                {user?.email?.includes("@johnston") ? (
+                  <div className={`rounded-full p-0.5 border-2 ${borderColor}`}>
+                    <Image
+                      src={avatarUserPlaceholder}
+                      alt="avatar"
+                      width={64}
+                      height={64}
+                      className="rounded-full drop-shadow-lg"
+                    />
+                  </div>
+                ) : (
+                  <Image
+                    src={avatarUserPlaceholder}
+                    alt="avatar"
+                    width={64}
+                    height={64}
+                    className="rounded-full drop-shadow-lg"
+                  />
+                )}
                 <div>
-                  <p className="text-20-medium">{user?.name}</p>
+                  <div className="text-20-medium flex  gap-1">
+                    <p className="text-20-medium">{user?.name}</p>
+
+                    {user?.email?.includes("@emard") && (
+                      <>
+                        {user.gender === "male" ? (
+                          <Image
+                            src="/icons/crown-king.svg"
+                            alt="crown king"
+                            width={34}
+                            height={37}
+                          />
+                        ) : (
+                          <Image
+                            src="/icons/crown-queen.svg"
+                            alt="crown queen"
+                            width={34}
+                            height={34}
+                          />
+                        )}
+                      </>
+                    )}
+
+                    {user?.email?.includes("@luettgen") && (
+                      <Image
+                        src="/icons/guard.svg"
+                        alt="guard badge"
+                        width={25}
+                        height={35}
+                      />
+                    )}
+                  </div>
                   <p className="text-16-medium !text-black-300">
                     {user?.email}
                   </p>
@@ -90,6 +135,10 @@ const PostDetail = ({ id }: { id: number }) => {
             <p className="no-result"> No details provided</p>
           )}
         </div>
+
+        <hr className="divider" />
+
+        <CommentList post_id={post.id} />
       </section>
     </>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +21,8 @@ import { Post } from "@/module/post/interface";
 import { actionsDropdownItems } from "@/constants";
 import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import ActionsModalContent from "@/components/ActionsModalContent";
 
 interface ActionDropdownProps {
   post: Post;
@@ -37,13 +38,23 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
   const [action, setAction] = useState<ActionType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const { toast } = useToast();
-
   const closeAllModals = () => {
     setIsModalOpen(false);
     setIsDropdownOpen(false);
     setAction(null);
   };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isModalOpen]);
 
   const handleAction = async () => {
     if (!action) return;
@@ -52,17 +63,12 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
 
     try {
       if (action.value === "delete") {
-        // API call to delete the post
         await api.delete(`/posts/${post.id}`);
         console.log(`Post deleted: ${post.id}`);
 
-        // Trigger success callback if provided
         if (onDeleteSuccess) onDeleteSuccess();
 
-        toast({
-          title: "Success",
-          description: "Post deleted successfully",
-        });
+        toast.success("Post deleted successfull.");
         closeAllModals();
       } else if (action.value === "update") {
         console.log(`Post updated: ${post.id}`);
@@ -71,11 +77,21 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
       closeAllModals();
     } catch (error) {
       console.error("An error occurred while performing the action:", error);
-      toast({
-        title: "Error",
-        description: "An error occurred while performing the action:",
-        variant: "destructive",
-      });
+      toast.error("An error occurred while performing the action");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleUpdate = async (data: Post) => {
+    setIsLoading(true);
+    try {
+      await api.put(`/posts/${post.id}`, data);
+      toast.success("Post updated successfull.");
+      closeAllModals();
+    } catch (e) {
+      console.error("An error occurred while performing the action:", e);
+      toast.error("Fail to update the post.");
     } finally {
       setIsLoading(false);
     }
@@ -85,46 +101,60 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
     if (!action) return null;
 
     return (
-      <DialogContent>
-        <DialogHeader className="flex flex-col gap-3">
-          <DialogTitle className="text-center">{action.label}</DialogTitle>
+      <>
+        <DialogContent className=" rounded-[26px] w-[90%] max-w-[400px] px-6 py-8 shadow-lg">
+          <DialogHeader className="flex flex-col gap-3">
+            <DialogTitle className="text-center text-lg font-bold">
+              {action.label}
+            </DialogTitle>
+
+            {action.value === "delete" && (
+              <p className="text-center text-gray-700">
+                Are you sure you want to delete{" "}
+                <span className="font-bold">{post.title}</span>?
+              </p>
+            )}
+
+            {action.value === "update" && (
+              <ActionsModalContent
+                post={post}
+                onSubmit={handleUpdate}
+                isLoading={isLoading}
+              />
+            )}
+          </DialogHeader>
 
           {action.value === "delete" && (
-            <p className="text-center">
-              Are you sure you want to delete{" "}
-              <span className="font-bold">{post.title}</span>?
-            </p>
+            <DialogFooter className="flex flex-col gap-3 md:flex-row">
+              <Button
+                onClick={closeAllModals}
+                variant="secondary"
+                className="modal-cancel-button"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAction}
+                disabled={isLoading}
+                variant="destructive"
+                className="modal-submit-button"
+              >
+                {isLoading ? (
+                  <Image
+                    src="/icons/loader2.svg"
+                    alt="Loading..."
+                    width={24}
+                    height={24}
+                    className="animate-spin"
+                  />
+                ) : (
+                  action.label
+                )}
+              </Button>
+            </DialogFooter>
           )}
-        </DialogHeader>
-
-        <DialogFooter className="flex flex-col gap-3 md:flex-row">
-          <Button
-            onClick={closeAllModals}
-            variant="secondary"
-            className="modal-cancel-button"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleAction}
-            disabled={isLoading}
-            variant="destructive"
-            className="modal-submit-button"
-          >
-            {isLoading ? (
-              <Image
-                src="/icons/loader2.svg"
-                alt="Loading..."
-                width={24}
-                height={24}
-                className="animate-spin"
-              />
-            ) : (
-              action.label
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+        </DialogContent>
+      </>
     );
   };
 

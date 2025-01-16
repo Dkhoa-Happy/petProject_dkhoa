@@ -1,63 +1,54 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Post } from "@/module/post/interface";
 import { User } from "@/module/user/interface";
 import { getAllUser } from "@/module/user/userApi";
 import LoaderSpin from "@/components/LoaderSpin";
 import PostCard from "@/components/PostCard";
 import { getAllPost } from "@/module/post/postApi";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PostList = ({ query }: { query: string }) => {
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
-  const [page, setPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
+    queryKey: ["users"],
+    queryFn: getAllUser,
+    select: (data) => data?.data || [],
+  });
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const { data } = await getAllUser();
-        setUsers(data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-    fetchUsers();
-  }, []);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isLoading: isLoadingPosts,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["posts", query],
+    queryFn: ({ pageParam = 1 }) => getAllPost(pageParam, 10),
+    getNextPageParam: (lastPage, allPages) => {
+      return lastPage?.length > 0 ? allPages.length + 1 : undefined;
+    },
+  });
 
-  const fetchPosts = async () => {
-    if (isLoading || !hasMore) return; // Skip if already loading or no more posts
-    setIsLoading(true);
-    try {
-      const postsData = await getAllPost(page, 10); // Fetch 10 posts per page
-      if (postsData?.length > 0) {
-        const updatedPost = postsData.map((post: Post) => {
-          const regex = /!\[.*?\]\((.*?)\)/;
-          const match = post.body.match(regex);
-          return { ...post, imageUrl: match ? match[1] : null };
-        });
-
-        setPosts((prevPosts) => [...prevPosts, ...updatedPost]);
-        setPage((prevPage) => prevPage + 1); // Increment page
-      } else {
-        setHasMore(false); // No more posts to load
-      }
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const posts =
+    data?.pages.flatMap((page) =>
+      page.map((post: Post) => {
+        const regex = /!\[.*?\]\((.*?)\)/;
+        const match = post.body.match(regex);
+        return { ...post, imageUrl: match ? match[1] : null };
+      }),
+    ) || [];
 
   return (
     <>
-      {" "}
       <ul className="mt-7 card_grid">
-        {posts.length > 0 ? (
+        {isLoadingUsers || isLoadingPosts ? (
+          <PostCardSkeleton />
+        ) : posts.length > 0 ? (
           posts.map((post) => {
-            const user = users.find((user) => user.id === post.user_id);
+            const user = users.find((user: User) => user.id === post.user_id);
             return (
               <PostCard
                 key={post.id}
@@ -72,8 +63,24 @@ const PostList = ({ query }: { query: string }) => {
           <p className="no-results">No Post Found</p>
         )}
       </ul>
-      {hasMore && <LoaderSpin onInView={fetchPosts} isLoading={isLoading} />}
+      {hasNextPage && (
+        <LoaderSpin
+          onInView={() => fetchNextPage()}
+          isLoading={isFetchingNextPage}
+        />
+      )}
     </>
   );
 };
+
+export const PostCardSkeleton = () => (
+  <>
+    {[0, 1, 2, 3, 4, 5].map((index: number) => (
+      <li key={cn("skeleton", index)}>
+        <Skeleton className="post_skeleton" />
+      </li>
+    ))}
+  </>
+);
+
 export default PostList;
