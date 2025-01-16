@@ -11,6 +11,10 @@ export const actionsDropdownItems = [
   },
 ];
 
+export const regex = /!\[.*?\]\((.*?)\)/;
+
+export const confirmDeleteTest = "Are you sure you want to delete";
+
 export const avatarPlaceholderUrl =
   "https://i.pinimg.com/736x/ae/ba/70/aeba702dc253fc6b892693a028473b9b.jpg";
 
