@@ -7,7 +7,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { getPostById } from "@/module/post/postApi";
 import { getUserById } from "@/module/user/userApi";
-import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
+import {
+  avatarUserPlaceholder,
+  postImagePlaceholder,
+  regex,
+} from "@/constants";
 import CommentList from "@/components/CommentLlist";
 
 const md = markdownit();
@@ -24,8 +28,6 @@ const PostDetail = ({ id }: { id: number }) => {
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["postDetail", id],
     queryFn: () => fetchPostWithUser(id),
-    staleTime: 60000,
-    retry: false,
   });
 
   if (isLoading) {
@@ -41,7 +43,7 @@ const PostDetail = ({ id }: { id: number }) => {
   }
 
   const { post, user } = data!;
-  const imageUrl = post.body.match(/!\[.*?\]\((.*?)\)/)?.[1] || null;
+  const imageUrl = post.body.match(regex)?.[1] || null;
   const parsedContent = md.render(post.body || "");
 
   const borderColor =

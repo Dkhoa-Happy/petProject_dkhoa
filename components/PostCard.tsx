@@ -44,7 +44,7 @@ const PostCard = ({
       className="post group"
     >
       <div className="flex-between">
-        <p className="post_date">25/1/2025</p>
+        <p className="post_date">29/01/2025</p>
         <div className="flex gap-1.5">
           <ActionDropdown post={post} />
         </div>

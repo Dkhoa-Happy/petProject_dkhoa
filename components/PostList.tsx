@@ -5,11 +5,12 @@ import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { Post } from "@/module/post/interface";
 import { User } from "@/module/user/interface";
 import { getAllUser } from "@/module/user/userApi";
+import { searchPost, getAllPost } from "@/module/post/postApi";
 import LoaderSpin from "@/components/LoaderSpin";
 import PostCard from "@/components/PostCard";
-import { getAllPost } from "@/module/post/postApi";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { regex } from "@/constants";
 
 const PostList = ({ query }: { query: string }) => {
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
@@ -25,9 +26,11 @@ const PostList = ({ query }: { query: string }) => {
     isLoading: isLoadingPosts,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: ["posts"],
-    queryFn: ({ pageParam = 1 }) => getAllPost(pageParam, 10),
+    queryKey: ["posts", query],
+    queryFn: ({ pageParam = 1 }) =>
+      query ? searchPost(query) : getAllPost(pageParam, 10),
     getNextPageParam: (lastPage, allPages) => {
+      if (query) return undefined; // Stop infinite fetching when in search mode
       return lastPage?.length > 0 ? allPages.length + 1 : undefined;
     },
   });
@@ -35,7 +38,6 @@ const PostList = ({ query }: { query: string }) => {
   const posts =
     data?.pages.flatMap((page) =>
       page.map((post: Post) => {
-        const regex = /!\[.*?\]\((.*?)\)/;
         const match = post.body.match(regex);
         return { ...post, imageUrl: match ? match[1] : null };
       }),
