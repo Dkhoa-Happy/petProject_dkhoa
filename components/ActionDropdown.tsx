@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 import { Post } from "@/module/post/interface";
-import { actionsDropdownItems, confirmDeleteTest } from "@/constants";
+import { actionsDropdownItems } from "@/constants";
 import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
 import { toast } from "sonner";
@@ -39,11 +39,22 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   const closeAllModals = () => {
-    if (isLoading) return;
     setIsModalOpen(false);
     setIsDropdownOpen(false);
     setAction(null);
   };
+
+  useEffect(() => {
+    if (isModalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isModalOpen]);
 
   const handleAction = async () => {
     if (!action) return;
@@ -71,18 +82,18 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
       setIsLoading(false);
     }
   };
+
   const handleUpdate = async (data: Post) => {
     setIsLoading(true);
     try {
       await api.put(`/posts/${post.id}`, data);
-      toast.success("Post updated successfully.");
+      toast.success("Post updated successfull.");
       closeAllModals();
     } catch (e) {
       console.error("An error occurred while performing the action:", e);
-      toast.error("Failed to update the post.");
+      toast.error("Fail to update the post.");
     } finally {
       setIsLoading(false);
-      closeAllModals();
     }
   };
 
@@ -91,10 +102,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
 
     return (
       <>
-        <DialogContent
-          className=" rounded-[26px] w-[90%] max-w-[400px] px-6 py-8 shadow-lg"
-          aria-describedby="dialog-description"
-        >
+        <DialogContent className=" rounded-[26px] w-[90%] max-w-[400px] px-6 py-8 shadow-lg">
           <DialogHeader className="flex flex-col gap-3">
             <DialogTitle className="text-center text-lg font-bold">
               {action.label}
@@ -102,7 +110,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
 
             {action.value === "delete" && (
               <p className="text-center text-gray-700">
-                {confirmDeleteTest}{" "}
+                Are you sure you want to delete{" "}
                 <span className="font-bold">{post.title}</span>?
               </p>
             )}
@@ -115,6 +123,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
               />
             )}
           </DialogHeader>
+
           {action.value === "delete" && (
             <DialogFooter className="flex flex-col gap-3 md:flex-row">
               <Button

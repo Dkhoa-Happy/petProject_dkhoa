@@ -19,8 +19,14 @@ import { Button } from "@/components/ui/button";
 import { Send } from "lucide-react";
 import { formSchema } from "@/lib/validation";
 import { User } from "@/module/user/interface";
-import { getAllUser } from "@/module/user/userApi";
 
+// Fetch users
+const fetchUsers = async (): Promise<User[]> => {
+  const response = await api.get("/users");
+  return response.data || [];
+};
+
+// Submit post
 const submitPost = async ({
   selectedUser,
   formValues,
@@ -42,23 +48,17 @@ const PostForm = () => {
   const { toast } = useToast();
   const router = useRouter();
 
-  const {
-    data: userResponse,
-    isLoading: isLoadingUsers,
-    error,
-  } = useQuery(["users"], () => getAllUser(1, 100), {
-    onSuccess: (response) => {
-      console.log("Users loaded:", response.data);
-      if (response.data.length > 0) {
-        setSelectedUser(response.data[0].id);
-      }
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery<User[]>(
+    ["users"],
+    fetchUsers,
+    {
+      onSuccess: (data) => {
+        if (data.length > 0) {
+          setSelectedUser(data[0].id);
+        }
+      },
     },
-    onError: (error) => {
-      console.error("Error loading users:", error);
-    },
-  });
-
-  const users = userResponse?.data || [];
+  );
 
   const mutation = useMutation(submitPost, {
     onSuccess: (data) => {
@@ -136,7 +136,7 @@ const PostForm = () => {
           User
         </label>
         <Select
-          value={selectedUser ? String(selectedUser) : undefined}
+          value={selectedUser}
           onValueChange={(value) => setSelectedUser(Number(value))}
         >
           <SelectTrigger className="post-form_input">
@@ -152,10 +152,6 @@ const PostForm = () => {
               <SelectItem value="loading" disabled>
                 Loading users...
               </SelectItem>
-            ) : error ? (
-              <SelectItem value="error" disabled>
-                Failed to load users.
-              </SelectItem>
             ) : users.length > 0 ? (
               users.map((user: User) => (
                 <SelectItem key={user.id} value={String(user.id)}>
@@ -164,7 +160,7 @@ const PostForm = () => {
               ))
             ) : (
               <SelectItem value="no-users" disabled>
-                No users available.
+                No users available
               </SelectItem>
             )}
           </SelectContent>

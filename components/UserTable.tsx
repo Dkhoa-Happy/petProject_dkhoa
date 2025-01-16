@@ -14,36 +14,36 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useQuery } from "@tanstack/react-query";
-import { User } from "@/module/user/interface";
 
 const UserTable = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
-  const [usersPerPage, setUsersPerPage] = useState(10);
+  const usersPerPage = 8;
 
-  //Xủ lí search user nếu không phân trang
-  const fetchUsers = async () => {
-    if (searchQuery) {
-      const searchResult = await searchUser(searchQuery);
-      return {
-        data: searchResult,
-        total: searchResult.length,
-      };
-    }
-    return await getAllUser(currentPage, usersPerPage);
-  };
-
+  // Lấy dữ liệu người dùng thông thường
   const {
-    data: usersData,
+    data: allUsers = [],
     isLoading,
     isError,
-  } = useQuery(["users", currentPage, usersPerPage, searchQuery], fetchUsers, {
-    keepPreviousData: true,
+  } = useQuery(["users"], () => getAllUser(1, 100), {
+    select: (data) => data?.data || [],
+    initialData: [],
   });
 
-  const users = usersData?.data || [];
-  const totalUsers = usersData?.total || 0;
-  const totalPages = Math.ceil(totalUsers / usersPerPage);
+  const { data: searchedUsers = [], isFetching } = useQuery(
+    ["users", "search", searchQuery],
+    () => searchUser(searchQuery),
+    {
+      enabled: !!searchQuery,
+      select: (data) => data || [],
+    },
+  );
+
+  const users = searchQuery ? searchedUsers : allUsers;
+  const totalPages = Math.ceil(users.length / usersPerPage);
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -51,14 +51,7 @@ const UserTable = () => {
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1);
-  };
-
-  const handleUsersPerPageChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    setUsersPerPage(Number(e.target.value));
-    setCurrentPage(1);
+    setCurrentPage(1); // Reset về trang đầu khi tìm kiếm
   };
 
   if (isLoading) {
@@ -68,38 +61,6 @@ const UserTable = () => {
   if (isError) {
     return <p>Failed to load users. Please try again later.</p>;
   }
-
-  const generatePagination = (
-    currentPage: number,
-    totalPages: number,
-    siblings: number = 1,
-  ) => {
-    const range = [];
-    const start = Math.max(currentPage - siblings, 1);
-    const end = Math.min(currentPage + siblings, totalPages);
-
-    if (start > 1) {
-      range.push(1);
-      if (start > 2) {
-        range.push("...");
-      }
-    }
-
-    for (let i = start; i <= end; i++) {
-      range.push(i);
-    }
-
-    if (end < totalPages) {
-      if (end < totalPages - 1) {
-        range.push("...");
-      }
-      range.push(totalPages);
-    }
-
-    return range;
-  };
-
-  const paginationItems = generatePagination(currentPage, totalPages, 1);
 
   return (
     <section>
@@ -131,48 +92,40 @@ const UserTable = () => {
               </tr>
             </thead>
             <tbody>
-              {users.length > 0 ? (
-                users.map((user: User, index: number) => (
-                  <tr key={index} className="border-t">
-                    <td className="py-4">{user.id}</td>
-                    <td className="py-4">{user.name}</td>
-                    <td className="py-4">
-                      {user.gender === "male" ? (
-                        <CgGenderMale className="text-blue-600 h-7 w-7" />
-                      ) : (
-                        <CgGenderFemale className="text-pink-600 h-7 w-7" />
-                      )}
-                    </td>
-                    <td className="py-4">{user.email}</td>
-                    <td className="py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-16-medium ${
-                          user?.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="py-4">10</td>
-                    <td className="py-4">
-                      <Link href={`/user/${user.id}`} passHref>
-                        <button className="flex items-center text-blue-500 hover:text-blue-700">
-                          <Eye className="h-4 w-4 mr-1" />
-                          View Posts
-                        </button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="text-center py-4 text-gray-500">
-                    No users found.
+              {currentUsers.map((user, index) => (
+                <tr key={index} className="border-t">
+                  <td className="py-4">{user.id}</td>
+                  <td className="py-4">{user.name}</td>
+                  <td className="py-4">
+                    {user.gender === "male" ? (
+                      <CgGenderMale className="text-blue-600 h-7 w-7" />
+                    ) : (
+                      <CgGenderFemale className="text-pink-600 h-7 w-7" />
+                    )}
+                  </td>
+                  <td className="py-4">{user.email}</td>
+                  <td className="py-4">
+                    <span
+                      className={`px-2 py-1 rounded-full text-16-medium ${
+                        user?.status === "active"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {user.status}
+                    </span>
+                  </td>
+                  <td className="py-4">10</td>
+                  <td className="py-4">
+                    <Link href={`/user/${user.id}`} passHref>
+                      <button className="flex items-center text-blue-500 hover:text-blue-700">
+                        <Eye className="h-4 w-4 mr-1" />
+                        View Posts
+                      </button>
+                    </Link>
                   </td>
                 </tr>
-              )}
+              ))}
             </tbody>
           </table>
         </div>
@@ -180,9 +133,9 @@ const UserTable = () => {
           {users.length > 0 ? (
             <>
               <p className="text-sm text-gray-500">
-                Showing {(currentPage - 1) * usersPerPage + 1} to{" "}
-                {Math.min(currentPage * usersPerPage, totalUsers)} of{" "}
-                {totalUsers} entries
+                Showing {indexOfFirstUser + 1} to{" "}
+                {Math.min(indexOfLastUser, users.length)} of {users.length}{" "}
+                entries
               </p>
               <Pagination>
                 <PaginationPrevious
@@ -191,21 +144,16 @@ const UserTable = () => {
                   Previous
                 </PaginationPrevious>
                 <PaginationContent>
-                  {paginationItems.map((item, index) =>
-                    item === "..." ? (
-                      <PaginationItem key={index}>
-                        <span className="text-gray-500 px-2">...</span>
-                      </PaginationItem>
-                    ) : (
-                      <PaginationItem key={index}>
-                        <PaginationLink
-                          onClick={() => handlePageChange(item as number)}
-                        >
-                          {item}
-                        </PaginationLink>
-                      </PaginationItem>
-                    ),
-                  )}
+                  {Array.from({ length: totalPages }, (_, i) => (
+                    <PaginationItem key={i}>
+                      <PaginationLink
+                        onClick={() => handlePageChange(i + 1)}
+                        active={currentPage === i + 1}
+                      >
+                        {i + 1}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ))}
                 </PaginationContent>
                 <PaginationNext
                   onClick={() =>
@@ -215,19 +163,6 @@ const UserTable = () => {
                   Next
                 </PaginationNext>
               </Pagination>
-              <div>
-                <select
-                  value={usersPerPage}
-                  onChange={handleUsersPerPageChange}
-                  className="border rounded-md px-2 py-1 ml-4"
-                >
-                  {[5, 10, 15, 20].map((num) => (
-                    <option key={num} value={num}>
-                      {num} / page
-                    </option>
-                  ))}
-                </select>
-              </div>
             </>
           ) : (
             <p className="text-sm text-gray-500">No users found.</p>

@@ -10,7 +10,6 @@ import PostCard from "@/components/PostCard";
 import { getAllPost } from "@/module/post/postApi";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import { regex } from "@/constants";
 
 const PostList = ({ query }: { query: string }) => {
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
@@ -36,6 +35,7 @@ const PostList = ({ query }: { query: string }) => {
   const posts =
     data?.pages.flatMap((page) =>
       page.map((post: Post) => {
+        const regex = /!\[.*?\]\((.*?)\)/;
         const match = post.body.match(regex);
         return { ...post, imageUrl: match ? match[1] : null };
       }),
