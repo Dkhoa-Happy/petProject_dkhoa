@@ -1,4 +1,4 @@
-import Navbar from "@/components/shared/Navbar";
+import Navbar from "@/components/Navbar";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { ReactQueryProvider } from "@/app/clientWrapper";
 

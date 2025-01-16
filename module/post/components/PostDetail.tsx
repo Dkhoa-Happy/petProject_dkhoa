@@ -12,7 +12,7 @@ import {
   postImagePlaceholder,
   regex,
 } from "@/constants";
-import CommentList from "@/components/CommentLlist";
+import CommentList from "@/module/comment/components/CommentLlist";
 
 const md = markdownit();
 

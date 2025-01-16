@@ -6,6 +6,8 @@ import { getUserById } from "@/module/user/userApi";
 import Image from "next/image";
 import { avatarUserPlaceholder } from "@/constants";
 import { User } from "@/module/user/interface";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 const UserProfile = ({ id }: { id: number }) => {
   const {

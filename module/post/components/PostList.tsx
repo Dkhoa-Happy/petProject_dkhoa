@@ -7,7 +7,7 @@ import { User } from "@/module/user/interface";
 import { getAllUser } from "@/module/user/userApi";
 import { searchPost, getAllPost } from "@/module/post/postApi";
 import LoaderSpin from "@/components/LoaderSpin";
-import PostCard from "@/components/PostCard";
+import PostCard from "@/module/post/components/PostCard";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import { regex } from "@/constants";

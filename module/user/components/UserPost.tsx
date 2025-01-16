@@ -2,12 +2,14 @@
 
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import PostCard from "@/components/PostCard";
+import PostCard from "@/module/post/components/PostCard";
 import { getPostByUserId } from "@/module/post/postApi";
 import { getUserById } from "@/module/user/userApi";
 import { Post } from "@/module/post/interface";
 import { User } from "@/module/user/interface";
 import { regex } from "@/constants";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UserPost = ({ id }: { id: number }) => {
   const {
@@ -27,7 +29,7 @@ const UserPost = ({ id }: { id: number }) => {
   }
 
   if (isLoadingPosts || isLoadingUser) {
-    return <p className="loading">Loading...</p>;
+    return <UserSkeleton />;
   }
 
   const updatedPosts = posts.map((post) => {
@@ -53,5 +55,15 @@ const UserPost = ({ id }: { id: number }) => {
     </>
   );
 };
+
+export const UserSkeleton = () => (
+  <>
+    {[0, 1, 2, 3].map((index: number) => (
+      <li key={cn("skeleton", index)}>
+        <Skeleton className="post_skeleton" />
+      </li>
+    ))}
+  </>
+);
 
 export default UserPost;
