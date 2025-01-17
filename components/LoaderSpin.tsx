@@ -10,12 +10,12 @@ interface LoaderSpinProps {
 
 const LoaderSpin = ({ onInView, isLoading }: LoaderSpinProps) => {
   const [ref, inView] = useInView({
-    threshold: 0.5, // Trigger when at least 50% of the spinner is visible
+    threshold: 0.5,
   });
 
   useEffect(() => {
     if (inView && !isLoading) {
-      onInView(); // Fetch data when spinner enters the viewport
+      onInView();
     }
   }, [inView, isLoading, onInView]);
 

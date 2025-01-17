@@ -8,6 +8,7 @@ export const getAllPost = async (page: number = 1, perPage: number = 10) => {
         per_page: perPage,
       },
     });
+
     return response.data;
   } catch (error) {
     console.error(`Error fetching posts for page ${page}:`, error);
@@ -69,5 +70,26 @@ export const deletePost = async (id: number) => {
     return response.data;
   } catch (error) {
     console.error("Error deleting post:", error);
+  }
+};
+
+export const searchPost = async (title?: string, body?: string) => {
+  try {
+    const params: Record<string, string> = {};
+
+    if (title) params.title = title;
+    if (body) params.body = body;
+
+    const response = await api.get("/posts", { params });
+
+    return response.data;
+  } catch (e) {
+    console.error(
+      `Error searching for post with${title ? ` title "${title}"` : ""}${
+        body ? ` body "${body}"` : ""
+      }:`,
+      e,
+    );
+    return null;
   }
 };
