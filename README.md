@@ -25,7 +25,7 @@
 4. 🤸 [Quick Start](#quick-start)
 5. 🕸️ [Snippets (Code to Copy)](#snippets)
 6. 🔗 [Assets](#links)
-7. 🚀 [Website Link](#link)
+7. 🚀 [Web Link To View](#web)
 
 
 
@@ -464,11 +464,13 @@ export const formSchema = {
 
 </details>
 
+## <a name="web">🚀 Web Link</a>
 
-## <a name="link">🛜 Website Link</a>
 <a href="https://petproject-deploy-v3-1s3rb69zy-dang-khoas-projects-444bf235.vercel.app/" target="_blank">
-      Website Link
+      Link Website
     </a>
+
+
 
 
 ## <a name="links">🔗 Assets</a>
