@@ -1,5 +1,5 @@
-import UserTable from "@/module/user/components/UserTable";
-import StatCard from "@/module/user/components/StatCard";
+import UserTable from "@/modules/user/components/UserTable";
+import StatCard from "@/modules/user/components/StatCard";
 import { Users } from "lucide-react";
 
 const Page = () => {

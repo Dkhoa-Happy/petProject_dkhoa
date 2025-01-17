@@ -1,6 +1,6 @@
 import React from "react";
 import SearchForm from "@/components/SearchForm";
-import PostList from "@/module/post/components/PostList";
+import PostList from "@/modules/post/components/PostList";
 
 interface SearchParams {
   query?: string;

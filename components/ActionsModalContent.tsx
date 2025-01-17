@@ -4,11 +4,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Post } from "@/module/post/interface";
+import { Post } from "@/modules/post/interface";
 import {
   postUpdateFormSchema,
   PostUpdateFormSchema,
-} from "@/module/post/validation/validation";
+} from "@/modules/post/validation/validation";
 
 interface ActionsModalContentProps {
   post: Post;

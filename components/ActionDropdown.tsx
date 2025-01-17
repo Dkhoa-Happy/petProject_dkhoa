@@ -17,7 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import Image from "next/image";
-import { Post } from "@/module/post/interface";
+import { Post } from "@/modules/post/interface";
 import { actionsDropdownItems, confirmDeleteTest } from "@/constants";
 import { Button } from "@/components/ui/button";
 import api from "@/api/axios";

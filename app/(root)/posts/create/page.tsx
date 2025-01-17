@@ -1,5 +1,5 @@
 import React from "react";
-import PostForm from "@/module/post/components/PostForm";
+import PostForm from "@/modules/post/components/PostForm";
 
 const Page = () => {
   return (

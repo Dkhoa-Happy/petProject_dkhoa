@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
-import { PostCardSkeleton } from "@/module/post/components/PostCard";
-import UserPost from "@/module/user/components/UserPost";
-import UserProfile from "@/module/user/components/UserProfile";
+import { PostCardSkeleton } from "@/modules/post/components/PostCard";
+import UserPost from "@/modules/user/components/UserPost";
+import UserProfile from "@/modules/user/components/UserProfile";
 
 const Page = ({ params }: { params: { id: string } }) => {
   const id = Number(params.id);
