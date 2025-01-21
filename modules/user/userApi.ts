@@ -54,3 +54,19 @@ export const searchUser = async (name?: string, email?: string) => {
     return null;
   }
 };
+
+export const filterStatusUser = async (status?: string) => {
+  try {
+    const params = status ? { status } : {};
+
+    const response = await api.get("/users/", { params });
+
+    return response.data;
+  } catch (e) {
+    console.error(
+      `Error fetching users with${status ? ` status "${status}"` : ""}:`,
+      e,
+    );
+    return [];
+  }
+};

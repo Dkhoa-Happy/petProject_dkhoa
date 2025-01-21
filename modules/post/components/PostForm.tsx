@@ -35,7 +35,12 @@ const submitPost = async ({
   return response.data;
 };
 
-const PostForm = () => {
+interface Props {
+  type: "create" | "update";
+  schema: z.ZodObject<{ title: z.ZodString; body: z.ZodString }>;
+}
+
+const PostForm = ({ type, schema }: Props) => {
   const [post, setPost] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<number | "">("");
   const [errors, setErrors] = useState<Record<string, string>>({});

@@ -1,14 +1,18 @@
-import React from "react";
-import { Comment } from "@/modules/comment/interface";
+"use client";
+
+import React, { useState, useEffect } from "react";
+import type { Comment } from "@/modules/comment/interface";
 import { useQuery } from "@tanstack/react-query";
 import { getCommentByPostId } from "@/modules/comment/commentApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { avatarUserPlaceholder } from "@/constants";
-import { motion } from "framer-motion";
-import { MessageCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MessageCircle, CheckCircle } from "lucide-react";
 
 const CommentList = ({ post_id }: { post_id: number }) => {
+  const [allCommentsViewed, setAllCommentsViewed] = useState(false);
+
   const {
     data: comments = [],
     isLoading,
@@ -17,6 +21,16 @@ const CommentList = ({ post_id }: { post_id: number }) => {
   } = useQuery<Comment[]>(["comments", post_id], () =>
     getCommentByPostId(post_id),
   );
+
+  useEffect(() => {
+    if (comments.length > 0) {
+      const timer = setTimeout(() => {
+        setAllCommentsViewed(true);
+      }, comments.length * 300); // Adjust timing based on animation delay
+
+      return () => clearTimeout(timer);
+    }
+  }, [comments]);
 
   if (isLoading) {
     return (
@@ -62,37 +76,54 @@ const CommentList = ({ post_id }: { post_id: number }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5 }}
         >
-          {comments.map((item, index) => (
+          <AnimatePresence>
+            {comments.map((item, index) => (
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Card className="comment mb-4">
+                  <CardHeader className="bg-gray-50 p-4">
+                    <div className="flex items-center space-x-4">
+                      <Avatar className="h-12 w-12">
+                        <AvatarImage
+                          src={avatarUserPlaceholder}
+                          alt={item.name}
+                        />
+                        <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <CardTitle className="text-xl font-semibold text-gray-900">
+                          {item.name}
+                        </CardTitle>
+                        <p className="text-sm text-gray-600">{item.email}</p>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-4">
+                    <p className="text-gray-800 leading-relaxed">{item.body}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          {allCommentsViewed && (
             <motion.div
-              key={item.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: index * 0.1 }}
+              transition={{ duration: 0.5 }}
             >
-              <Card className="comment">
-                <CardHeader className="bg-gray-50 p-4">
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="h-12 w-12">
-                      <AvatarImage
-                        src={avatarUserPlaceholder}
-                        alt={item.name}
-                      />
-                      <AvatarFallback>{item.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <CardTitle className="text-xl font-semibold text-gray-900">
-                        {item.name}
-                      </CardTitle>
-                      <p className="text-sm text-gray-600">{item.email}</p>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <p className="text-gray-800 leading-relaxed">{item.body}</p>
+              <Card className="bg-green-50 border-green-200 p-4 rounded-lg">
+                <CardContent className="text-center text-green-700 flex items-center justify-center">
+                  <CheckCircle className="mr-2" />
+                  You&#39;ve viewed all comments for this post!
                 </CardContent>
               </Card>
             </motion.div>
-          ))}
+          )}
         </motion.div>
       )}
     </div>

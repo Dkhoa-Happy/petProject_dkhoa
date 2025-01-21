@@ -3,7 +3,11 @@
 import React, { useState } from "react";
 import { Eye, Search } from "lucide-react";
 import { CgGenderFemale, CgGenderMale } from "react-icons/cg";
-import { getAllUser, searchUser } from "@/modules/user/userApi";
+import {
+  filterStatusUser,
+  getAllUser,
+  searchUser,
+} from "@/modules/user/userApi";
 import Link from "next/link";
 import {
   Pagination,
@@ -15,21 +19,38 @@ import {
 } from "@/components/ui/pagination";
 import { useQuery } from "@tanstack/react-query";
 import { User } from "@/modules/user/interface";
+import { useDebounce } from "use-debounce";
+import EXPORTCSVButton from "@/modules/user/components/EXPORTCSVButton";
 
 const UserTable = () => {
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [usersPerPage, setUsersPerPage] = useState(10);
 
+  const [debounceSearchQuery] = useDebounce(searchQuery, 1000);
+
   //Xủ lí search user nếu không phân trang
   const fetchUsers = async () => {
-    if (searchQuery) {
-      const searchResult = await searchUser(searchQuery);
+    if (debounceSearchQuery) {
+      // Ưu tiên tìm kiếm nếu có query
+      const searchResult = await searchUser(debounceSearchQuery);
       return {
         data: searchResult,
         total: searchResult.length,
       };
     }
+
+    if (statusFilter) {
+      // Sử dụng API filterStatusUser nếu có trạng thái
+      const filterResult = await filterStatusUser(statusFilter);
+      return {
+        data: filterResult,
+        total: filterResult.length,
+      };
+    }
+
+    // Mặc định, gọi API getAllUser
     return await getAllUser(currentPage, usersPerPage);
   };
 
@@ -37,9 +58,13 @@ const UserTable = () => {
     data: usersData,
     isLoading,
     isError,
-  } = useQuery(["users", currentPage, usersPerPage, searchQuery], fetchUsers, {
-    keepPreviousData: true,
-  });
+  } = useQuery(
+    ["users", statusFilter, currentPage, usersPerPage, debounceSearchQuery],
+    fetchUsers,
+    {
+      keepPreviousData: true,
+    },
+  );
 
   const users = usersData?.data || [];
   const totalUsers = usersData?.total || 0;
@@ -59,6 +84,11 @@ const UserTable = () => {
   ) => {
     setUsersPerPage(Number(e.target.value));
     setCurrentPage(1);
+  };
+
+  const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatusFilter(e.target.value);
+    setCurrentPage(1); // Reset về trang đầu khi thay đổi bộ lọc
   };
 
   if (isLoading) {
@@ -105,6 +135,21 @@ const UserTable = () => {
     <section>
       <div className="user-table group">
         <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold">Users</h2>
+            <div className="flex items-center gap-4">
+              <EXPORTCSVButton data={users} fileName={users.csv} />
+              <select
+                value={statusFilter}
+                onChange={handleStatusChange}
+                className="border rounded-md px-2 py-1"
+              >
+                <option value="">All</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">All Users</h2>
             <div className="relative">
