@@ -21,6 +21,7 @@ import { useQuery } from "@tanstack/react-query";
 import { User } from "@/modules/user/interface";
 import { useDebounce } from "use-debounce";
 import EXPORTCSVButton from "@/modules/user/components/EXPORTCSVButton";
+import UserTableBody from "@/modules/user/components/UserTableBody";
 
 const UserTable = () => {
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -172,62 +173,13 @@ const UserTable = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
           </div>
-          <table className="w-full">
-            <thead>
-              <tr className="text-left justify-center text-gray-500">
-                <th className="pb-4">User ID</th>
-                <th className="pb-4">Name</th>
-                <th className="pb-4">Gender</th>
-                <th className="pb-4">Email</th>
-                <th className="pb-4">Status</th>
-                <th className="pb-4">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.length > 0 ? (
-                users.map((user: User, index: number) => (
-                  <tr key={index} className="border-t">
-                    <td className="py-4">{user.id}</td>
-                    <td className="py-4">{user.name}</td>
-                    <td className="py-4">
-                      {user.gender === "male" ? (
-                        <CgGenderMale className="text-blue-600 h-7 w-7" />
-                      ) : (
-                        <CgGenderFemale className="text-pink-600 h-7 w-7" />
-                      )}
-                    </td>
-                    <td className="py-4">{user.email}</td>
-                    <td className="py-4">
-                      <span
-                        className={`px-2 py-1 rounded-full text-16-medium ${
-                          user?.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-                    <td className="py-4">
-                      <Link href={`/user/${user.id}`} passHref>
-                        <button className="flex items-center text-blue-500 hover:text-blue-700">
-                          <Eye className="h-4 w-4 mr-1" />
-                          View Posts
-                        </button>
-                      </Link>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="text-center py-4 text-gray-500">
-                    No users found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <UserTableBody
+            users={users}
+            isLoading={isLoading}
+            isError={isError}
+          />
         </div>
+
         <div className="px-6 py-4 border-t flex justify-between items-center">
           {users.length > 0 ? (
             <>
