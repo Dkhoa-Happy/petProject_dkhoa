@@ -30,19 +30,29 @@ const UserTable = () => {
 
   const [debounceSearchQuery] = useDebounce(searchQuery, 1000);
 
-  //Xủ lí search user nếu không phân trang
   const fetchUsers = async () => {
     if (debounceSearchQuery) {
-      // Ưu tiên tìm kiếm nếu có query
-      const searchResult = await searchUser(debounceSearchQuery);
+      const searchResultByName = await searchUser(debounceSearchQuery);
+      const searchResultByEmail = await searchUser(
+        undefined,
+        debounceSearchQuery,
+      );
+
+      const uniqueResults = [
+        ...new Map(
+          [...(searchResultByName || []), ...(searchResultByEmail || [])].map(
+            (user) => [user.id, user],
+          ),
+        ).values(),
+      ];
+
       return {
-        data: searchResult,
-        total: searchResult.length,
+        data: uniqueResults,
+        total: uniqueResults.length,
       };
     }
 
     if (statusFilter) {
-      // Sử dụng API filterStatusUser nếu có trạng thái
       const filterResult = await filterStatusUser(statusFilter);
       return {
         data: filterResult,
@@ -50,7 +60,6 @@ const UserTable = () => {
       };
     }
 
-    // Mặc định, gọi API getAllUser
     return await getAllUser(currentPage, usersPerPage);
   };
 
@@ -88,7 +97,7 @@ const UserTable = () => {
 
   const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setStatusFilter(e.target.value);
-    setCurrentPage(1); // Reset về trang đầu khi thay đổi bộ lọc
+    setCurrentPage(1);
   };
 
   if (isLoading) {
@@ -171,7 +180,6 @@ const UserTable = () => {
                 <th className="pb-4">Gender</th>
                 <th className="pb-4">Email</th>
                 <th className="pb-4">Status</th>
-                <th className="pb-4">Total Post</th>
                 <th className="pb-4">Action</th>
               </tr>
             </thead>
@@ -200,7 +208,6 @@ const UserTable = () => {
                         {user.status}
                       </span>
                     </td>
-                    <td className="py-4">10</td>
                     <td className="py-4">
                       <Link href={`/user/${user.id}`} passHref>
                         <button className="flex items-center text-blue-500 hover:text-blue-700">

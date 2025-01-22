@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import MDEditor from "@uiw/react-md-editor";
 import { useToast } from "@/hooks/use-toast";
@@ -20,6 +20,9 @@ import { Send } from "lucide-react";
 import { formSchema } from "@/lib/validation";
 import { User } from "@/modules/user/interface";
 import { getAllUser } from "@/modules/user/userApi";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+const limit = 10;
 
 const submitPost = async ({
   selectedUser,
@@ -46,24 +49,44 @@ const PostForm = ({ type, schema }: Props) => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const router = useRouter();
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const {
-    data: userResponse,
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
     isLoading: isLoadingUsers,
-    error,
-  } = useQuery(["users"], () => getAllUser(1, 100), {
-    onSuccess: (response) => {
-      console.log("Users loaded:", response.data);
-      if (response.data.length > 0) {
-        setSelectedUser(response.data[0].id);
-      }
-    },
-    onError: (error) => {
-      console.error("Error loading users:", error);
-    },
+  } = useInfiniteQuery({
+    queryKey: ["users"],
+    queryFn: ({ pageParam = 1 }) => getAllUser(pageParam, limit),
+    getNextPageParam: (lastPage, allPages) =>
+      lastPage?.data.length > 0 ? allPages.length + 1 : undefined,
   });
 
-  const users = userResponse?.data || [];
+  const users =
+    data && data.pages && Array.isArray(data.pages)
+      ? data.pages.flatMap((page) => page.data as User[])
+      : [];
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 1.0 },
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
+    };
+  }, [hasNextPage, fetchNextPage]);
 
   const mutation = useMutation(submitPost, {
     onSuccess: (data) => {
@@ -152,23 +175,21 @@ const PostForm = ({ type, schema }: Props) => {
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {isLoadingUsers ? (
-              <SelectItem value="loading" disabled>
-                Loading users...
+            {users.length === 0 && !isLoadingUsers ? (
+              <SelectItem value="no-users" disabled>
+                No users available.
               </SelectItem>
-            ) : error ? (
-              <SelectItem value="error" disabled>
-                Failed to load users.
-              </SelectItem>
-            ) : users.length > 0 ? (
+            ) : (
               users.map((user: User) => (
                 <SelectItem key={user.id} value={String(user.id)}>
                   {user.name}
                 </SelectItem>
               ))
-            ) : (
-              <SelectItem value="no-users" disabled>
-                No users available.
+            )}
+            <div ref={loadMoreRef} style={{ height: "1px" }} />
+            {isFetchingNextPage && (
+              <SelectItem value="loading" disabled>
+                Loading more users...
               </SelectItem>
             )}
           </SelectContent>
