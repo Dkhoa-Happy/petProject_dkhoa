@@ -1,6 +1,10 @@
 import api from "@/api/axios";
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from "@/constants";
 
-export const getAllUser = async (page: number = 1, perPage: number = 10) => {
+export const getAllUser = async (
+  page: number = DEFAULT_PAGE,
+  perPage: number = DEFAULT_PER_PAGE,
+) => {
   try {
     const response = await api.get("/users", {
       params: {

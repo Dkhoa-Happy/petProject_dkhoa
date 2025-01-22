@@ -46,6 +46,7 @@ interface Props {
 const PostForm = ({ type, schema }: Props) => {
   const [post, setPost] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<number | "">("");
+  const [searchQuery, setSearchQuery] = useState<string>(""); // Search query state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const router = useRouter();
@@ -64,10 +65,11 @@ const PostForm = ({ type, schema }: Props) => {
       lastPage?.data.length > 0 ? allPages.length + 1 : undefined,
   });
 
-  const users =
-    data && data.pages && Array.isArray(data.pages)
-      ? data.pages.flatMap((page) => page.data as User[])
-      : [];
+  const users = data?.pages?.flatMap((page) => page.data as User[]) ?? [];
+
+  const filteredUsers = users.filter((user) =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  ); // Filter logic based on search query
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -175,12 +177,21 @@ const PostForm = ({ type, schema }: Props) => {
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {users.length === 0 && !isLoadingUsers ? (
+            {/* Search Input */}
+            <div className="p-2">
+              <Input
+                placeholder="Search users..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            {filteredUsers.length === 0 && !isLoadingUsers ? (
               <SelectItem value="no-users" disabled>
-                No users available.
+                No users found.
               </SelectItem>
             ) : (
-              users.map((user: User) => (
+              filteredUsers.map((user: User) => (
                 <SelectItem key={user.id} value={String(user.id)}>
                   {user.name}
                 </SelectItem>
