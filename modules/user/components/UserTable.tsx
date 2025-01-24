@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { Eye, Search } from "lucide-react";
-import { CgGenderFemale, CgGenderMale } from "react-icons/cg";
+import { Search } from "lucide-react";
 import {
   filterStatusUser,
   getAllUser,
   searchUser,
 } from "@/modules/user/userApi";
-import Link from "next/link";
 import {
   Pagination,
   PaginationContent,
@@ -18,7 +16,6 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { useQuery } from "@tanstack/react-query";
-import { User } from "@/modules/user/interface";
 import { useDebounce } from "use-debounce";
 import EXPORTCSVButton from "@/modules/user/components/EXPORTCSVButton";
 import UserTableBody from "@/modules/user/components/UserTableBody";

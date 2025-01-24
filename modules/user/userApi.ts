@@ -13,11 +13,10 @@ export const getAllUser = async (
       },
     });
 
-    const total = parseInt(response.headers["x-pagination-total"] || "0", 10);
-
+    // Use the custom total property from the response
     return {
       data: response.data || [],
-      total,
+      total: response.total || 0,
     };
   } catch (e) {
     console.error(
