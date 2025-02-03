@@ -22,21 +22,24 @@ import { actionsDropdownItems, confirmDeleteTest } from "@/constants";
 import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
 import { toast } from "sonner";
-import ActionsModalContent from "@/components/ActionsModalContent";
+import { useRouter } from "next/navigation";
 
 interface ActionDropdownProps {
   post: Post;
   onDeleteSuccess?: () => void;
+  onPostChange: () => void;
 }
 
 const ActionDropdown: React.FC<ActionDropdownProps> = ({
   post,
   onDeleteSuccess,
+  onPostChange,
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const closeAllModals = () => {
     if (isLoading) return;
@@ -58,6 +61,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
         if (onDeleteSuccess) onDeleteSuccess();
 
         toast.success("Post deleted successfull.");
+        onPostChange();
         closeAllModals();
       } else if (action.value === "update") {
         console.log(`Post updated: ${post.id}`);
@@ -76,6 +80,7 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
     try {
       await api.put(`/posts/${post.id}`, data);
       toast.success("Post updated successfully.");
+      onPostChange();
       closeAllModals();
     } catch (e) {
       console.error("An error occurred while performing the action:", e);
@@ -107,13 +112,11 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
               </p>
             )}
 
-            {action.value === "update" && (
-              <ActionsModalContent
-                post={post}
-                onSubmit={handleUpdate}
-                isLoading={isLoading}
-              />
-            )}
+            {action.value === "update" &&
+              (() => {
+                router.push(`/posts/update`);
+                return null;
+              })()}
           </DialogHeader>
           {action.value === "delete" && (
             <DialogFooter className="flex flex-col gap-3 md:flex-row">

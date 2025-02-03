@@ -25,7 +25,7 @@ const UserPost = ({ id }: { id: number }) => {
   } = useQuery<User>(["user", id], () => getUserById(id));
 
   if (isErrorPosts || isErrorUser) {
-    return <p className="error">Error fetching data.</p>;
+    return <p className="text-red-500 font-semibold">Error fetching data.</p>;
   }
 
   if (isLoadingPosts || isLoadingUser) {

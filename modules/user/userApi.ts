@@ -1,6 +1,10 @@
 import api from "@/api/axios";
+import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from "@/constants";
 
-export const getAllUser = async (page: number = 1, perPage: number = 10) => {
+export const getAllUser = async (
+  page: number = DEFAULT_PAGE,
+  perPage: number = DEFAULT_PER_PAGE,
+) => {
   try {
     const response = await api.get("/users", {
       params: {
@@ -9,11 +13,10 @@ export const getAllUser = async (page: number = 1, perPage: number = 10) => {
       },
     });
 
-    const total = parseInt(response.headers["x-pagination-total"] || "0", 10);
-
+    // Use the custom total property from the response
     return {
       data: response.data || [],
-      total,
+      total: response.total || 0,
     };
   } catch (e) {
     console.error(
@@ -52,5 +55,21 @@ export const searchUser = async (name?: string, email?: string) => {
       e,
     );
     return null;
+  }
+};
+
+export const filterStatusUser = async (status?: string) => {
+  try {
+    const params = status ? { status } : {};
+
+    const response = await api.get("/users/", { params });
+
+    return response.data;
+  } catch (e) {
+    console.error(
+      `Error fetching users with${status ? ` status "${status}"` : ""}:`,
+      e,
+    );
+    return [];
   }
 };
