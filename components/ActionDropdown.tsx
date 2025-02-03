@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import ActionsModalContent from "@/components/ActionsModalContent";
 
 interface ActionDropdownProps {
   post: Post;
@@ -112,11 +113,13 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
               </p>
             )}
 
-            {action.value === "update" &&
-              (() => {
-                router.push(`/posts/update`);
-                return null;
-              })()}
+            {action.value === "update" && (
+              <ActionsModalContent
+                post={post}
+                onSubmit={handleUpdate}
+                isLoading={isLoading}
+              />
+            )}
           </DialogHeader>
           {action.value === "delete" && (
             <DialogFooter className="flex flex-col gap-3 md:flex-row">
