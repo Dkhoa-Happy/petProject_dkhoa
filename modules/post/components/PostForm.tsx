@@ -1,11 +1,17 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import { Input } from "@/components/ui/input";
 import MDEditor from "@uiw/react-md-editor";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useMutation, useInfiniteQuery } from "@tanstack/react-query";
 import { z } from "zod";
 import api from "@/api/axios";
 import {
@@ -20,10 +26,11 @@ import { Send } from "lucide-react";
 import { formSchema } from "@/lib/validation";
 import { User } from "@/modules/user/interface";
 import { getAllUser } from "@/modules/user/userApi";
-import { useInfiniteQuery } from "@tanstack/react-query";
 
+// Số lượng người dùng lấy mỗi lần request
 const limit = 10;
 
+// Hàm submit post
 const submitPost = async ({
   selectedUser,
   formValues,
@@ -46,49 +53,62 @@ interface Props {
 const PostForm = ({ type, schema }: Props) => {
   const [post, setPost] = useState<string>("");
   const [selectedUser, setSelectedUser] = useState<number | "">("");
-  const [searchQuery, setSearchQuery] = useState<string>(""); // Search query state
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { toast } = useToast();
   const router = useRouter();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
+  /**
+   * Nếu API hỗ trợ filter theo tên, bạn có thể sửa lại hàm getAllUser và truyền searchQuery ở đây.
+   * Trong ví dụ này, chúng ta vẫn lấy tất cả rồi lọc phía client.
+   */
   const {
     data,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading: isLoadingUsers,
+    refetch,
   } = useInfiniteQuery({
-    queryKey: ["users"],
+    queryKey: ["users", searchQuery],
     queryFn: ({ pageParam = 1 }) => getAllUser(pageParam, limit),
     getNextPageParam: (lastPage, allPages) =>
-      lastPage?.data.length > 0 ? allPages.length + 1 : undefined,
+      lastPage?.data.length > 0 && allPages.length * limit < lastPage.total
+        ? allPages.length + 1
+        : undefined,
   });
 
-  const users = data?.pages?.flatMap((page) => page.data as User[]) ?? [];
-
-  const filteredUsers = users.filter((user) =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()),
-  ); // Filter logic based on search query
+  const allUsers = useMemo(
+    () => data?.pages?.flatMap((page) => page.data as User[]) ?? [],
+    [data],
+  );
+  const filteredUsers = useMemo(() => {
+    return allUsers.filter((user) =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+  }, [allUsers, searchQuery]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage) {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
           fetchNextPage();
         }
       },
       { threshold: 1.0 },
     );
 
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
-
     return () => {
-      if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
     };
-  }, [hasNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const mutation = useMutation(submitPost, {
     onSuccess: (data) => {
@@ -110,54 +130,58 @@ const PostForm = ({ type, schema }: Props) => {
     },
   });
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setErrors({});
+  // Sử dụng useCallback để tránh tạo hàm mới mỗi lần render
+  const handleSubmit = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      setErrors({});
 
-    const formData = new FormData(event.currentTarget);
-    const formValues = {
-      title: formData.get("title") as string,
-      body: post,
-    };
+      const formData = new FormData(event.currentTarget);
+      const formValues = {
+        title: formData.get("title") as string,
+        body: post,
+      };
 
-    try {
-      await formSchema.parseAsync(formValues);
+      try {
+        await formSchema.parseAsync(formValues);
 
-      if (!selectedUser) {
-        setErrors((prev) => ({
-          ...prev,
-          user: "Please select a user.",
-        }));
-        toast({
-          title: "Validation Error",
-          description: "Please select a valid user",
-          variant: "destructive",
-        });
-        return;
+        if (!selectedUser) {
+          setErrors((prev) => ({
+            ...prev,
+            user: "Please select a user.",
+          }));
+          toast({
+            title: "Validation Error",
+            description: "Please select a valid user",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        mutation.mutate({ selectedUser: Number(selectedUser), formValues });
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          const fieldErrors = error.flatten().fieldErrors;
+          setErrors(fieldErrors as Record<string, string>);
+
+          toast({
+            title: "Validation Error",
+            description:
+              "Invalid input. Please correct the errors and try again.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "An unexpected error occurred.",
+            variant: "destructive",
+          });
+        }
+        console.error("Validation failed:", error);
       }
-
-      mutation.mutate({ selectedUser: Number(selectedUser), formValues });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const fieldErrors = error.flatten().fieldErrors;
-        setErrors(fieldErrors as Record<string, string>);
-
-        toast({
-          title: "Validation Error",
-          description:
-            "Invalid input. Please correct the errors and try again.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred.",
-          variant: "destructive",
-        });
-      }
-      console.error("Validation failed:", error);
-    }
-  };
+    },
+    [post, selectedUser, mutation, toast],
+  );
 
   return (
     <form className="post-form" onSubmit={handleSubmit}>
@@ -172,12 +196,11 @@ const PostForm = ({ type, schema }: Props) => {
           <SelectTrigger className="post-form_input">
             <SelectValue>
               {selectedUser !== ""
-                ? users.find((user: User) => user.id === selectedUser)?.name
+                ? allUsers.find((user: User) => user.id === selectedUser)?.name
                 : "Select a user"}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {/* Search Input */}
             <div className="p-2">
               <Input
                 placeholder="Search users..."
@@ -199,13 +222,10 @@ const PostForm = ({ type, schema }: Props) => {
             )}
             <div ref={loadMoreRef} style={{ height: "1px" }} />
             {isFetchingNextPage && (
-              <SelectItem value="loading" disabled>
-                Loading more users...
-              </SelectItem>
+              <div className="p-2 text-center">Loading more users...</div>
             )}
           </SelectContent>
         </Select>
-
         {errors.user && <p className="post-form_error">{errors.user}</p>}
       </div>
 
