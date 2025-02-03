@@ -1,6 +1,6 @@
 import React from "react";
 import SearchForm from "@/components/SearchForm";
-import PostList from "@/components/PostList";
+import PostList from "@/modules/post/components/PostList";
 
 interface SearchParams {
   query?: string;
@@ -26,7 +26,7 @@ const Home = ({ searchParams }: { searchParams: SearchParams }) => {
         <p className="text-30-semibold">
           {query ? `Search results for "${query}"` : "All Posts"}
         </p>
-        <PostList query="query" />
+        <PostList query={query} />
       </section>
     </>
   );

@@ -1,16 +1,16 @@
 import React from "react";
-import { Post } from "@/module/post/interface";
-import Link from "next/link";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import markdownit from "markdown-it";
-import { Skeleton } from "@/components/ui/skeleton";
-import { User } from "@/module/user/interface";
-import { BookCopy } from "lucide-react";
-import ActionDropdown from "@/components/ActionDropdown";
-import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
 import { motion } from "framer-motion";
+import { Post } from "@/modules/post/interface";
+import { User } from "@/modules/user/interface";
+import ActionDropdown from "@/components/ActionDropdown";
+import Link from "next/link";
+import Image from "next/image";
+import { avatarUserPlaceholder, postImagePlaceholder } from "@/constants";
+import { BookCopy } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const md = markdownit();
 const PostCard = ({
@@ -44,7 +44,7 @@ const PostCard = ({
       className="post group"
     >
       <div className="flex-between">
-        <p className="post_date">25/1/2025</p>
+        <p className="post_date">29/01/2025</p>
         <div className="flex gap-1.5">
           <ActionDropdown post={post} />
         </div>

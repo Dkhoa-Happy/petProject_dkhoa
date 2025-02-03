@@ -1,10 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://gorest.co.in/public/v2/", // Base URL for the API
+  baseURL: "https://gorest.co.in/public/v2/",
 });
 
-// Add a request interceptor to attach the token
 api.interceptors.request.use(
   (config) => {
     const token =
@@ -14,7 +13,7 @@ api.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error), // Handle request errors
+  (error) => Promise.reject(error),
 );
 
 export default api;

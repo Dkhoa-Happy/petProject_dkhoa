@@ -1,7 +1,7 @@
 import React from "react";
-import { Comment } from "@/module/comment/interface";
+import { Comment } from "@/modules/comment/interface";
 import { useQuery } from "@tanstack/react-query";
-import { getCommentByPostId } from "@/module/comment/commentApi";
+import { getCommentByPostId } from "@/modules/comment/commentApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { avatarUserPlaceholder } from "@/constants";
@@ -14,16 +14,8 @@ const CommentList = ({ post_id }: { post_id: number }) => {
     isLoading,
     isError,
     error,
-  } = useQuery<Comment[]>(
-    ["comments", post_id],
-    () => getCommentByPostId(post_id),
-    {
-      staleTime: 1000 * 60 * 5,
-      retry: 1,
-      onError: (error) => {
-        console.error("Error fetching comments:", error);
-      },
-    },
+  } = useQuery<Comment[]>(["comments", post_id], () =>
+    getCommentByPostId(post_id),
   );
 
   if (isLoading) {

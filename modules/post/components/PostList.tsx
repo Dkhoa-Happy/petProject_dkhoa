@@ -2,19 +2,20 @@
 
 import React from "react";
 import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
-import { Post } from "@/module/post/interface";
-import { User } from "@/module/user/interface";
-import { getAllUser } from "@/module/user/userApi";
+import { Post } from "@/modules/post/interface";
+import { User } from "@/modules/user/interface";
+import { getAllUser } from "@/modules/user/userApi";
+import { searchPost, getAllPost } from "@/modules/post/postApi";
 import LoaderSpin from "@/components/LoaderSpin";
-import PostCard from "@/components/PostCard";
-import { getAllPost } from "@/module/post/postApi";
+import PostCard from "@/modules/post/components/PostCard";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { regex } from "@/constants";
 
 const PostList = ({ query }: { query: string }) => {
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["users"],
-    queryFn: getAllUser,
+    queryFn: () => getAllUser(1, 100),
     select: (data) => data?.data || [],
   });
 
@@ -26,8 +27,10 @@ const PostList = ({ query }: { query: string }) => {
     isFetchingNextPage,
   } = useInfiniteQuery({
     queryKey: ["posts", query],
-    queryFn: ({ pageParam = 1 }) => getAllPost(pageParam, 10),
+    queryFn: ({ pageParam = 1 }) =>
+      query ? searchPost(query) : getAllPost(pageParam, 10),
     getNextPageParam: (lastPage, allPages) => {
+      if (query) return undefined;
       return lastPage?.length > 0 ? allPages.length + 1 : undefined;
     },
   });
@@ -35,7 +38,6 @@ const PostList = ({ query }: { query: string }) => {
   const posts =
     data?.pages.flatMap((page) =>
       page.map((post: Post) => {
-        const regex = /!\[.*?\]\((.*?)\)/;
         const match = post.body.match(regex);
         return { ...post, imageUrl: match ? match[1] : null };
       }),
@@ -60,7 +62,9 @@ const PostList = ({ query }: { query: string }) => {
             );
           })
         ) : (
-          <p className="no-results">No Post Found</p>
+          <p className="no-results">
+            {query ? `No results for "${query}"` : "No posts found"}
+          </p>
         )}
       </ul>
       {hasNextPage && (
