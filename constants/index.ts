@@ -24,6 +24,5 @@ export const avatarUserPlaceholder =
 export const postImagePlaceholder =
   "https://i.pinimg.com/736x/7e/6a/7a/7e6a7ad6ede2b31f94dc38a6fcd7752e.jpg";
 
-//Pagination Default
 export const DEFAULT_PAGE = 1;
 export const DEFAULT_PER_PAGE = 10;
