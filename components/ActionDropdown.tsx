@@ -22,7 +22,6 @@ import { actionsDropdownItems, confirmDeleteTest } from "@/constants";
 import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import ActionsModalContent from "@/components/ActionsModalContent";
 
 interface ActionDropdownProps {
@@ -40,7 +39,6 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const closeAllModals = () => {
     if (isLoading) return;
@@ -51,7 +49,6 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
 
   const handleAction = async () => {
     if (!action) return;
-    let success = false;
     setIsLoading(true);
 
     try {

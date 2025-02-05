@@ -6,13 +6,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { User } from "@/modules/user/interface";
 
 interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
   totalUsers: number;
   usersPerPage: number;
-  users: any[];
+  users: User[];
   onPageChange: (page: number) => void;
   onUsersPerPageChange: (value: number) => void;
 }

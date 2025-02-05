@@ -69,7 +69,6 @@ const PostForm = ({ type, schema }: Props) => {
     hasNextPage,
     isFetchingNextPage,
     isLoading: isLoadingUsers,
-    refetch,
   } = useInfiniteQuery({
     queryKey: ["users", searchQuery],
     queryFn: ({ pageParam = 1 }) => getAllUser(pageParam, limit),

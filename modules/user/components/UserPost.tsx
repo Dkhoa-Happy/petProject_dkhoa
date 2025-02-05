@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import PostCard from "@/modules/post/components/PostCard";
 import { getPostByUserId } from "@/modules/post/postApi";
 import { getUserById } from "@/modules/user/userApi";
@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const UserPost = ({ id }: { id: number }) => {
+  const queryClient = useQueryClient();
+
   const {
     data: posts = [],
     isLoading: isLoadingPosts,
@@ -37,6 +39,10 @@ const UserPost = ({ id }: { id: number }) => {
     return { ...post, imageUrl: match ? match[1] : undefined };
   });
 
+  const refreshPosts = () => {
+    queryClient.invalidateQueries(["posts", id]);
+  };
+
   return (
     <>
       {updatedPosts.length > 0 ? (
@@ -47,6 +53,7 @@ const UserPost = ({ id }: { id: number }) => {
             user={user || undefined}
             imageUrl={post.imageUrl || ""}
             index={index + 1}
+            onPostChange={refreshPosts}
           />
         ))
       ) : (

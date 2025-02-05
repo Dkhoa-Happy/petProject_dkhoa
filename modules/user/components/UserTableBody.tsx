@@ -2,7 +2,7 @@ import type React from "react";
 import { CgGenderFemale, CgGenderMale } from "react-icons/cg";
 import { Eye } from "lucide-react";
 import Link from "next/link";
-import { User, UserTableBodyProps } from "@/modules/user/interface";
+import { UserTableBodyProps } from "@/modules/user/interface";
 
 const UserTableBody: React.FC<UserTableBodyProps> = ({
   users,
