@@ -1,7 +1,7 @@
 <div align="center">
   <br />
     <a href="https://petproject-deploy-v3-1s3rb69zy-dang-khoas-projects-444bf235.vercel.app/" target="_blank">
-      <img src="https://cloud.appwrite.io/v1/storage/buckets/6759845a00023e9da43a/files/67809fed0008dcb6a8cc/view?project=67597a160036fc9160b4" alt="Project Banner">
+      <img src="https://firebasestorage.googleapis.com/v0/b/movie-management-c2908.appspot.com/o/%E1%BA%A2nh%20ch%E1%BB%A5p%20m%C3%A0n%20h%C3%ACnh%202025-02-05%20093305.png?alt=media&token=386cc520-8f2f-4018-a646-db398d30d030" alt="Project Banner">
     </a>
   <br />
 
