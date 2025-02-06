@@ -3,6 +3,7 @@ import { CgGenderFemale, CgGenderMale } from "react-icons/cg";
 import { Eye } from "lucide-react";
 import Link from "next/link";
 import { UserTableBodyProps } from "@/modules/user/interface";
+import Image from "next/image";
 
 const UserTableBody: React.FC<UserTableBodyProps> = ({
   users,
@@ -12,7 +13,13 @@ const UserTableBody: React.FC<UserTableBodyProps> = ({
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <Image
+          src="/icons/Loader.svg"
+          alt="Loader icon"
+          width={56}
+          height={56}
+          className="object-contain animate-spin"
+        />
       </div>
     );
   }
