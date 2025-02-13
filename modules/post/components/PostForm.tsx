@@ -26,9 +26,8 @@ import { Send } from "lucide-react";
 import { formSchema } from "@/lib/validation";
 import { User } from "@/modules/user/interface";
 import { getAllUser } from "@/modules/user/userApi";
-
-// Số lượng người dùng lấy mỗi lần request
-const limit = 10;
+import { usersPerPage } from "@/constants";
+import Image from "next/image";
 
 // Hàm submit post
 const submitPost = async ({
@@ -71,9 +70,10 @@ const PostForm = ({ type, schema }: Props) => {
     isLoading: isLoadingUsers,
   } = useInfiniteQuery({
     queryKey: ["users", searchQuery],
-    queryFn: ({ pageParam = 1 }) => getAllUser(pageParam, limit),
+    queryFn: ({ pageParam = 1 }) => getAllUser(pageParam, usersPerPage),
     getNextPageParam: (lastPage, allPages) =>
-      lastPage?.data.length > 0 && allPages.length * limit < lastPage.total
+      lastPage?.data.length > 0 &&
+      allPages.length * usersPerPage < lastPage.total
         ? allPages.length + 1
         : undefined,
   });
@@ -82,11 +82,14 @@ const PostForm = ({ type, schema }: Props) => {
     () => data?.pages?.flatMap((page) => page.data as User[]) ?? [],
     [data],
   );
-  const filteredUsers = useMemo(() => {
-    return allUsers.filter((user) =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()),
-    );
-  }, [allUsers, searchQuery]);
+
+  const filteredUsers = useMemo(
+    () =>
+      allUsers.filter((user) =>
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [allUsers, searchQuery],
+  );
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -221,7 +224,15 @@ const PostForm = ({ type, schema }: Props) => {
             )}
             <div ref={loadMoreRef} style={{ height: "1px" }} />
             {isFetchingNextPage && (
-              <div className="p-2 text-center">Loading more users...</div>
+              <div className="flex justify-center items-center">
+                <Image
+                  src="/icons/Loader.svg"
+                  alt="Loader icon"
+                  width={56}
+                  height={56}
+                  className="object-contain animate-spin"
+                />
+              </div>
             )}
           </SelectContent>
         </Select>
