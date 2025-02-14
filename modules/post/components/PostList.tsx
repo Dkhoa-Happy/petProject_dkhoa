@@ -1,7 +1,11 @@
 "use client";
 
 import React from "react";
-import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
+import {
+  useQuery,
+  useInfiniteQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { Post } from "@/modules/post/interface";
 import { User } from "@/modules/user/interface";
 import { getAllUser } from "@/modules/user/userApi";
@@ -13,12 +17,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { regex } from "@/constants";
 
 const PostList = ({ query }: { query: string }) => {
+  const queryClient = useQueryClient();
+
+  // Fetch users
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["users"],
     queryFn: () => getAllUser(1, 100),
     select: (data) => data?.data || [],
   });
 
+  // Fetch posts with infinite scrolling
   const {
     data,
     fetchNextPage,
@@ -35,6 +43,7 @@ const PostList = ({ query }: { query: string }) => {
     },
   });
 
+  // Map posts and extract imageUrl
   const posts =
     data?.pages.flatMap((page) =>
       page.map((post: Post) => {
@@ -42,6 +51,11 @@ const PostList = ({ query }: { query: string }) => {
         return { ...post, imageUrl: match ? match[1] : null };
       }),
     ) || [];
+
+  // Function to handle refreshing the posts
+  const refreshPosts = () => {
+    queryClient.invalidateQueries(["posts", query]);
+  };
 
   return (
     <>
@@ -58,6 +72,7 @@ const PostList = ({ query }: { query: string }) => {
                 user={user}
                 imageUrl={post.imageUrl || ""}
                 index={1}
+                onPostChange={refreshPosts} // Pass refresh function to PostCard
               />
             );
           })

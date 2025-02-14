@@ -6,6 +6,8 @@ import { getUserById } from "@/modules/user/userApi";
 import Image from "next/image";
 import { avatarUserPlaceholder } from "@/constants";
 import { User } from "@/modules/user/interface";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UserProfile = ({ id }: { id: number }) => {
   const {
@@ -15,11 +17,13 @@ const UserProfile = ({ id }: { id: number }) => {
   } = useQuery<User>(["user", id], () => getUserById(id));
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <UserSkeleton />;
   }
 
   if (isError || !user) {
-    return <div>Error fetching user data</div>;
+    return (
+      <div className="text-red-500 font-semibold">Error fetching user data</div>
+    );
   }
 
   const borderColor =
@@ -84,5 +88,11 @@ const UserProfile = ({ id }: { id: number }) => {
     </div>
   );
 };
+
+export const UserSkeleton = () => (
+  <>
+    <Skeleton className="h-[250px] w-[250px] rounded-xl bg-zinc-400" />
+  </>
+);
 
 export default UserProfile;

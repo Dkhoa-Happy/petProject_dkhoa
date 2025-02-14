@@ -18,11 +18,13 @@ const PostCard = ({
   user,
   imageUrl,
   index,
+  onPostChange,
 }: {
   post: Post;
   user?: User;
   imageUrl: string;
   index: number;
+  onPostChange: () => void;
 }) => {
   const borderColor =
     user?.status === "active" ? "border-green-500" : "border-red-500";
@@ -46,7 +48,7 @@ const PostCard = ({
       <div className="flex-between">
         <p className="post_date">29/01/2025</p>
         <div className="flex gap-1.5">
-          <ActionDropdown post={post} />
+          <ActionDropdown post={post} onPostChange={onPostChange} />
         </div>
       </div>
 

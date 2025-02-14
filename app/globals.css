@@ -327,10 +327,7 @@
   @apply primary-btn !mx-0 h-[52px] w-full flex-1 !important;
 }
 
-/*  footer */
-.social-icon {
-  @apply w-12 h-12 rounded-full flex justify-center items-center bg-black-300 border border-black-200;
-}
+
 @layer base {
   * {
     @apply border-border;
