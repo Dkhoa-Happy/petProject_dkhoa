@@ -1,0 +1,38 @@
+import { useState, useEffect } from "react";
+import { Post } from "@/module/post/interface";
+import { User } from "@/module/user/interface";
+import {fetchPosts, fetchUsers} from "@/module/data/fetchData";
+
+export const usePosts = (initialQuery: string) => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  useEffect(() => {
+    const initializeUsers = async () => {
+      const usersData = await fetchUsers();
+      setUsers(usersData);
+    };
+
+    initializeUsers();
+  }, []);
+
+  const loadPosts = async () => {
+    if (isLoading || !hasMore) return;
+    setIsLoading(true);
+    const postsData = await fetchPosts(page, 10);
+
+    if (postsData.length > 0) {
+      setPosts((prevPosts) => [...prevPosts, ...postsData]);
+      setPage((prevPage) => prevPage + 1);
+    } else {
+      setHasMore(false);
+    }
+
+    setIsLoading(false);
+  };
+
+  return { posts, users, loadPosts, isLoading, hasMore };
+};

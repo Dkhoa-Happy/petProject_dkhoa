@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { avatarUserPlaceholder } from "@/constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, CheckCircle } from "lucide-react";
+import Image from "next/image";
 
 const CommentList = ({ post_id }: { post_id: number }) => {
   const [allCommentsViewed, setAllCommentsViewed] = useState(false);
@@ -19,7 +20,7 @@ const CommentList = ({ post_id }: { post_id: number }) => {
     isError,
     error,
   } = useQuery<Comment[]>(["comments", post_id], () =>
-    getCommentByPostId(post_id),
+    getCommentByPostId(post_id)
   );
 
   useEffect(() => {
@@ -35,7 +36,13 @@ const CommentList = ({ post_id }: { post_id: number }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-40">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        <Image
+          src="/icons/Loader.svg"
+          alt="Loader icon"
+          width={56}
+          height={56}
+          className="object-contain animate-spin"
+        />
       </div>
     );
   }

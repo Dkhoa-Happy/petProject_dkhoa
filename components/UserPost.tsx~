@@ -1,19 +1,15 @@
 "use client";
 
 import React from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import PostCard from "@/modules/post/components/PostCard";
-import { getPostByUserId } from "@/modules/post/postApi";
-import { getUserById } from "@/modules/user/userApi";
-import { Post } from "@/modules/post/interface";
-import { User } from "@/modules/user/interface";
+import { useQuery } from "@tanstack/react-query";
+import PostCard from "@/components/PostCard";
+import { getPostByUserId } from "@/module/post/postApi";
+import { getUserById } from "@/module/user/userApi";
+import { Post } from "@/module/post/interface";
+import { User } from "@/module/user/interface";
 import { regex } from "@/constants";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 
 const UserPost = ({ id }: { id: number }) => {
-  const queryClient = useQueryClient();
-
   const {
     data: posts = [],
     isLoading: isLoadingPosts,
@@ -27,21 +23,17 @@ const UserPost = ({ id }: { id: number }) => {
   } = useQuery<User>(["user", id], () => getUserById(id));
 
   if (isErrorPosts || isErrorUser) {
-    return <p className="text-red-500 font-semibold">Error fetching data.</p>;
+    return <p className="error">Error fetching data.</p>;
   }
 
   if (isLoadingPosts || isLoadingUser) {
-    return <UserSkeleton />;
+    return <p className="loading">Loading...</p>;
   }
 
   const updatedPosts = posts.map((post) => {
     const match = post.body.match(regex);
     return { ...post, imageUrl: match ? match[1] : undefined };
   });
-
-  const refreshPosts = () => {
-    queryClient.invalidateQueries(["posts", id]);
-  };
 
   return (
     <>
@@ -53,7 +45,6 @@ const UserPost = ({ id }: { id: number }) => {
             user={user || undefined}
             imageUrl={post.imageUrl || ""}
             index={index + 1}
-            onPostChange={refreshPosts}
           />
         ))
       ) : (
@@ -62,15 +53,5 @@ const UserPost = ({ id }: { id: number }) => {
     </>
   );
 };
-
-export const UserSkeleton = () => (
-  <>
-    {[0, 1, 2, 3].map((index: number) => (
-      <li key={cn("skeleton", index)}>
-        <Skeleton className="post_skeleton" />
-      </li>
-    ))}
-  </>
-);
 
 export default UserPost;

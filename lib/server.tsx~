@@ -1,0 +1,69 @@
+import React from "react";
+import SearchForm from "@/components/SearchForm";
+import PostCard from "@/components/PostCard";
+import { fetchPosts } from "@/module/post/postApi";
+import { fetchUsers } from "@/module/user/userApi";
+
+export const getServerSideProps = async () => {
+    try {
+        const users = await fetchUsers("getAll");
+        const postsData = await fetchPosts("getAll", { page: 1, perPage: 10 });
+        const posts = postsData.map((post: any) => {
+            const regex = /!\[.*?\]\((.*?)\)/;
+            const match = post.body.match(regex);
+            return { ...post, imageUrl: match ? match[1] : null };
+        });
+
+        return {
+            props: {
+                users,
+                posts,
+            },
+        };
+    } catch (error) {
+        console.error("Error fetching data:", error);
+        return { props: { users: [], posts: [] } };
+    }
+};
+
+const Home = ({ users, posts }: { users: any[]; posts: any[] }) => {
+    return (
+        <>
+            <section className="blue_container">
+        <h1 className="heading">
+            Manage Your Post, <br />
+    Connect with People
+    </h1>
+    <p className="sub-heading !max-w-3xl">
+        Submit your post and connect with people from around the world.
+    </p>
+    <SearchForm query="" />
+        </section>
+
+        <section className="section_container">
+    <p className="text-30-semibold">All Posts</p>
+
+    <ul className="mt-7 card_grid">
+        {posts.length > 0 ? (
+                posts.map((post) => {
+                    const user = users.find((user) => user.id === post.user_id);
+                    return (
+                        <PostCard
+                            key={post.id}
+                    post={post}
+                    user={user}
+                    imageUrl={post.imageUrl || ""}
+                    index={1}
+                    />
+                );
+                })
+            ) : (
+                <p className="no-results">No Post Found</p>
+)}
+    </ul>
+    </section>
+    </>
+);
+};
+
+export default Home;

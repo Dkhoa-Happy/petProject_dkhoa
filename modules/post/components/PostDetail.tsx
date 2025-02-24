@@ -13,8 +13,6 @@ import {
   regex,
 } from "@/constants";
 import CommentList from "@/modules/comment/components/CommentLlist";
-import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import PostDetailSkeleton from "@/modules/post/components/PostDetailSkeleton";
 
 const md = markdownit();

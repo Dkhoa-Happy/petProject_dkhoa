@@ -24,13 +24,14 @@ const UserTablePagination: React.FC<UserTablePaginationProps> = ({
   onUsersPerPageChange,
 }) => {
   const totalPages = Math.ceil(totalUsers / usersPerPage);
+  const startEntry = (currentPage - 1) * usersPerPage + 1;
+  const endEntry = Math.min(currentPage * usersPerPage, totalUsers);
 
   return (
     <>
       <p className="text-sm text-gray-500">
-        Showing {(currentPage - 1) * usersPerPage + 1} to{" "}
-        {Math.min(currentPage * usersPerPage, totalUsers)} of {totalUsers}{" "}
-        entries
+        Showing {startEntry} to
+        {endEntry} of {totalUsers} entries
       </p>
       <Pagination>
         <PaginationPrevious

@@ -22,7 +22,7 @@ import { actionsDropdownItems, confirmDeleteTest } from "@/constants";
 import { Button } from "@/components/ui/button";
 import api from "@/api/axios";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import ActionsModalContent from "@/components/ActionsModalContent";
 
 interface ActionDropdownProps {
   post: Post;
@@ -39,7 +39,6 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [action, setAction] = useState<ActionType | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   const closeAllModals = () => {
     if (isLoading) return;
@@ -50,7 +49,6 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
 
   const handleAction = async () => {
     if (!action) return;
-    let success = false;
     setIsLoading(true);
 
     try {
@@ -112,11 +110,13 @@ const ActionDropdown: React.FC<ActionDropdownProps> = ({
               </p>
             )}
 
-            {action.value === "update" &&
-              (() => {
-                router.push(`/posts/update`);
-                return null;
-              })()}
+            {action.value === "update" && (
+              <ActionsModalContent
+                post={post}
+                onSubmit={handleUpdate}
+                isLoading={isLoading}
+              />
+            )}
           </DialogHeader>
           {action.value === "delete" && (
             <DialogFooter className="flex flex-col gap-3 md:flex-row">

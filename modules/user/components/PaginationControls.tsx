@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo } from "react";
 import {
   Pagination,
   PaginationContent,
@@ -6,13 +9,14 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { User } from "@/modules/user/interface";
 
 interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
   totalUsers: number;
   usersPerPage: number;
-  users: any[];
+  users: User[];
   onPageChange: (page: number) => void;
   onUsersPerPageChange: (value: number) => void;
 }
@@ -26,20 +30,15 @@ const PaginationControls = ({
   onPageChange,
   onUsersPerPageChange,
 }: PaginationControlsProps) => {
-  const generatePagination = (
-    currentPage: number,
-    totalPages: number,
-    siblings: number = 1,
-  ) => {
-    const range = [];
+  const paginationItems = useMemo(() => {
+    const range: (number | string)[] = [];
+    const siblings = 1;
     const start = Math.max(currentPage - siblings, 1);
     const end = Math.min(currentPage + siblings, totalPages);
 
     if (start > 1) {
       range.push(1);
-      if (start > 2) {
-        range.push("...");
-      }
+      if (start > 2) range.push("...");
     }
 
     for (let i = start; i <= end; i++) {
@@ -47,16 +46,12 @@ const PaginationControls = ({
     }
 
     if (end < totalPages) {
-      if (end < totalPages - 1) {
-        range.push("...");
-      }
+      if (end < totalPages - 1) range.push("...");
       range.push(totalPages);
     }
 
     return range;
-  };
-
-  const paginationItems = generatePagination(currentPage, totalPages, 1);
+  }, [currentPage, totalPages]);
 
   return (
     <div className="px-6 py-4 border-t flex justify-between items-center">
@@ -71,6 +66,7 @@ const PaginationControls = ({
           <Pagination>
             <PaginationPrevious
               onClick={() => onPageChange(Math.max(currentPage - 1, 1))}
+              disabled={currentPage === 1}
             />
             <PaginationContent>
               {paginationItems.map((item, index) =>
@@ -82,6 +78,7 @@ const PaginationControls = ({
                   <PaginationItem key={index}>
                     <PaginationLink
                       onClick={() => onPageChange(item as number)}
+                      isActive={item === currentPage}
                     >
                       {item}
                     </PaginationLink>
@@ -93,6 +90,7 @@ const PaginationControls = ({
               onClick={() =>
                 onPageChange(Math.min(currentPage + 1, totalPages))
               }
+              disabled={currentPage === totalPages}
             />
           </Pagination>
 
